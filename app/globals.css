@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .info-text {
+    @apply p-3 bg-gray-700/50 rounded-xl max-w-[200px] text-sm cursor-pointer hover:bg-gray-700/70
+  }
+
+  .chat-row{
+    @apply rounded-xl px-5 py-3 text-sm flex items-center justify-center space-x-2 hover:bg-gray-700/70 cursor-pointer text-gray-300 
+    transition-all duration-200 ease-out
+  }
+}
