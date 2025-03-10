@@ -1,9 +1,10 @@
 import adminDB from "@/firebase-admin";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import admin from "firebase-admin";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import axios from "axios";
+const SerpApi = require("google-search-results-nodejs");
+const { getJson } = require("serpapi");
 
 type Message = {
   text: string;
@@ -19,23 +20,58 @@ type Message = {
 const client = new GoogleGenerativeAI(process.env.GEMINI_API || "");
 const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+const search = new SerpApi.GoogleSearch();
 // Number of previous messages to include as context
 const MAX_CONTEXT_MESSAGES = 10;
 
-function generatePrompt(prompt: string, clothesData: any, previousMessages: Message[]) {
+function generateQueryPrompt(prompt: string, previousMessages: Message[]) {
+  // Format previous messages for query context
+  let conversationHistory = "";
+  if (previousMessages.length > 0) {
+    conversationHistory = "\nPrevious conversation:\n";
+    previousMessages.forEach((msg) => {
+      const role = msg.user._id === "SpaceGPT" ? "Assistant" : "User";
+      conversationHistory += `${role}: ${msg.text}\n`;
+    });
+  }
+
+  return `
+    You are a search query optimizer for a clothing recommendation system.
+    
+    Given the user's input and conversation history, generate the best possible search query for Google that would find relevant clothing items.
+    
+    The query should:
+    1. Be concise (maximum 5-7 words)
+    2. Include specific clothing types, brands, or styles mentioned
+    3. Add relevant fashion terms if appropriate
+    4. Focus on the main intent of the user's request
+    5. Only return the optimized search query text, nothing else
+    
+    ${conversationHistory}
+    User input: "${prompt}"
+    
+    Optimized search query:
+  `;
+}
+
+function generatePrompt(
+  prompt: string,
+  clothesData: any,
+  previousMessages: Message[]
+) {
   const clothesDataString = JSON.stringify(clothesData);
-  
+
   // Format previous messages for context
   let conversationHistory = "";
   if (previousMessages.length > 0) {
     conversationHistory = "\nPrevious conversation:\n";
-    previousMessages.forEach(msg => {
+    previousMessages.forEach((msg) => {
       const role = msg.user._id === "SpaceGPT" ? "Assistant" : "User";
       conversationHistory += `${role}: ${msg.text}\n`;
     });
     conversationHistory += "\n";
   }
-  
+
   return `
     You are a friendly AI clothing assistant. Your task is to provide clothing recommendations in a helpful and courteous manner. 
     Greet the user warmly and acknowledge their request.
@@ -71,7 +107,7 @@ function generatePrompt(prompt: string, clothesData: any, previousMessages: Mess
 
 export async function POST(request: Request, res: NextApiResponse) {
   const { prompt, chatId, session } = await request.json();
-  
+
   // Create the user message
   const userMessage: Message = {
     text: prompt,
@@ -90,43 +126,56 @@ export async function POST(request: Request, res: NextApiResponse) {
     .collection("chats")
     .doc(chatId)
     .collection("messages");
-    
+
   const prevMessagesSnapshot = await messagesRef
     .orderBy("createdAt", "desc")
     .limit(MAX_CONTEXT_MESSAGES)
     .get();
-    
+
   const previousMessages: Message[] = [];
-  prevMessagesSnapshot.docs.forEach(doc => {
+  prevMessagesSnapshot.docs.forEach((doc) => {
     previousMessages.push(doc.data() as Message);
   });
-  
+
   // Reverse to get chronological order
   previousMessages.reverse();
 
-  // Get product recommendations
-  const response = await axios.post(
-    `http://127.0.0.1:5000/api/query?text=${prompt}`,
-    {
-      index_name: "products2",
-    }
-  );
+  // First, generate an optimized search query using the LLM
+  const queryPrompt = generateQueryPrompt(prompt, previousMessages);
+  const queryResult = await model.generateContent([queryPrompt]);
+  const optimizedQuery = queryResult.response.text().trim();
 
-  const elasticData = response.data;
-  
+  console.log(optimizedQuery)
+  // Use the optimized query for SerpAPI
+  const searchPromise = new Promise((resolve, reject) => {
+    getJson({
+      engine: "google_shopping",
+      q: optimizedQuery,
+      location:"India",
+      api_key: process.env.SERP_API
+    }, (json) => {
+      resolve(json["shopping_results"]);
+    });
+  });
+
+  const searchRes = await searchPromise;
+
+
+  console.log(searchRes)
+
   // Generate prompt with context
-  const llmPrompt = generatePrompt(prompt, elasticData, previousMessages);
-  
+  const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
+
   // Generate response with context-aware prompt
   const result = await model.generateContent([llmPrompt]);
 
   // Save the user message first
   await messagesRef.add(userMessage);
-  
+
   // Create and save the AI response
   const message: Message = {
     text: result.response.text() || "Sorry, I don't understand",
-    products: elasticData,
+    products: searchRes, // Store the search results
     createdAt: admin.firestore.Timestamp.now(),
     user: {
       _id: "SpaceGPT",
@@ -134,8 +183,11 @@ export async function POST(request: Request, res: NextApiResponse) {
       avatar: "https://ui-avatars.com/api/?name=AI",
     },
   };
-  
+
   await messagesRef.add(message);
-  
-  return NextResponse.json({ answer: message.text as string });
+
+  return NextResponse.json({ 
+    answer: message.text as string,
+    searchQuery: optimizedQuery // Return the optimized query for debugging
+  });
 }

@@ -12,7 +12,7 @@ const Message = ({ message }: Props) => {
     return price;
   };
 
-  console.log("data", message);
+  console.log("data", message.products);
   return (
     <div className="items-center flex justify-center mt-3 w-full">
       <div
@@ -123,53 +123,73 @@ const Message = ({ message }: Props) => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {message.products.map((product: any, index: number) => {
-                      const imageUrl =
-                        product.product_images_y &&
-                        product.product_images_y.length > 0
-                          ? product.product_images_y[0].match(
-                              /https?:\/\/[^'"\s]+/g
-                            )?.[0] || ""
-                          : "";
-
-                      return (
-                        <div
-                          key={index}
-                          className="bg-white text-gray-900 rounded-lg overflow-hidden"
-                        >
-                          <div className="relative h-64 bg-gray-200">
-                            {imageUrl && (
-                              <img
-                                src={imageUrl}
-                                alt={product.product_name_y || "Product image"}
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <div className="text-xs text-gray-500">
-                              {product.brand_name || ""}
+                    {message.products && message.products.length > 0
+                      ? message.products.slice(0, 7).map((product, index) => {
+                          const hasDiscount =
+                            product.old_price && product.price;
+                          return (
+                            <div
+                              key={index}
+                              className="bg-white text-gray-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                            >
+                              <div className="relative h-64 bg-gray-200">
+                                {product.thumbnail && (
+                                  <img
+                                    src={product.thumbnail}
+                                    alt={product.title || "Product image"}
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
+                                {product.tag && (
+                                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                    {product.tag}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="p-4">
+                                <div className="flex items-center mb-2">
+                                  {product.source_icon && (
+                                    <img
+                                      src={product.source_icon}
+                                      alt={product.source || "Brand"}
+                                      className="h-4 w-4 mr-2"
+                                    />
+                                  )}
+                                  <div className="text-xs text-gray-500">
+                                    {product.source || ""}
+                                  </div>
+                                </div>
+                                <h3 className="font-medium text-sm mt-1 line-clamp-2 h-10">
+                                  {product.title || "Product Name"}
+                                </h3>
+                                <div className="mt-3 flex items-center">
+                                  <div className="font-semibold">
+                                    {product.price || ""}
+                                  </div>
+                                  {hasDiscount && (
+                                    <div className="ml-2 text-xs text-gray-500 line-through">
+                                      {product.old_price}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="mt-3">
+                                  <button
+                                    onClick={() => {
+                                      window.open(
+                                        product.product_link,
+                                        "_blank"
+                                      );
+                                    }}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+                                  >
+                                    View Product
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                            <h3 className="font-medium text-sm mt-1 line-clamp-2 h-10">
-                              {product.product_name_y || "Product Name"}
-                            </h3>
-                            <div className="mt-2 font-semibold">
-                              $ {formatPrice(product.product_price_y || "0")}
-                            </div>
-                            <div className="mt-2">
-                              <button
-                                onClick={() => {
-                                  router.push(product.product_url_y);
-                                }}
-                                className="w-full text-sm text-center text-blue-600 hover:underline"
-                              >
-                                Click for details
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })
+                      : null}
                   </div>
                 </div>
               </div>
