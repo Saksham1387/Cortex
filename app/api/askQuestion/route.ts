@@ -145,23 +145,25 @@ export async function POST(request: Request, res: NextApiResponse) {
   const queryResult = await model.generateContent([queryPrompt]);
   const optimizedQuery = queryResult.response.text().trim();
 
-  console.log(optimizedQuery)
+  console.log(optimizedQuery);
   // Use the optimized query for SerpAPI
   const searchPromise = new Promise((resolve, reject) => {
-    getJson({
-      engine: "google_shopping",
-      q: optimizedQuery,
-      location:"India",
-      api_key: process.env.SERP_API
-    }, (json) => {
-      resolve(json["shopping_results"]);
-    });
+    getJson(
+      {
+        engine: "google_shopping",
+        q: optimizedQuery,
+        location: "India",
+        api_key: process.env.SERP_API,
+      },
+      (json: any) => {
+        resolve(json["shopping_results"]);
+      }
+    );
   });
 
   const searchRes = await searchPromise;
 
-
-  console.log(searchRes)
+  console.log(searchRes);
 
   // Generate prompt with context
   const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
@@ -186,8 +188,8 @@ export async function POST(request: Request, res: NextApiResponse) {
 
   await messagesRef.add(message);
 
-  return NextResponse.json({ 
+  return NextResponse.json({
     answer: message.text as string,
-    searchQuery: optimizedQuery // Return the optimized query for debugging
+    searchQuery: optimizedQuery, // Return the optimized query for debugging
   });
 }

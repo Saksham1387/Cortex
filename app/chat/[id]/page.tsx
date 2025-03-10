@@ -1,5 +1,5 @@
-import Chat from "@/Components/Chat";
-import ChatInput from "@/Components/ChatInput";
+import Chat from "@/components/Chat";
+import ChatInput from "@/components/ChatInput";
 
 type Props = {
   params: {
