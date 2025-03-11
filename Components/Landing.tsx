@@ -1,7 +1,8 @@
 import { SearchBar } from "@/components/landing/search-bar";
-import { Header } from "@/components/landing/header";
 import { TrendingSection } from "@/components/landing/trending-section";
 import { QuickLinks } from "@/components/landing/quick-links";
+import { Greeting } from "./Greetings";
+import TypewriterEffect from "./landing/typewriter-effect";
 
 export default function Landing() {
   return (
@@ -12,16 +13,28 @@ export default function Landing() {
         </div>
         <div className="flex flex-col items-center justify-center max-w-3xl mx-auto mt-20 mb-16">
           <h1 className="text-3xl md:text-5xl text-center mb-2">
-            What can I help you find?
+            <Greeting /> What can I help you find?
           </h1>
-          <p className="text-muted-foreground text-center mb-8">
-            Search and discover anything, secondhand. Feeling lucky?
-          </p>
+          <div className="py-3">
+            <TypewriterEffect
+              words={[
+                "Find unique deals, sustainably",
+                "A treasure hunt, just a click away",
+                "Rare finds. Great prices. One search",
+                "Shop smarter, shop secondhand",
+                "Hidden gems, waiting for you",
+                "Swipe, shop, and save effortlessly",
+                "One search, endless possibilities",
+                "Software Engineer",
+                "Pre-loved, re-loved—just for you.",
+              ]}
+            />
+          </div>
           <SearchBar />
           <QuickLinks />
         </div>
         <div className="mt-28">
-        <TrendingSection />
+          <TrendingSection />
         </div>
       </main>
     </div>

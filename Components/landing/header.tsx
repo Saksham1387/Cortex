@@ -1,18 +1,14 @@
 "use client";
-
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { signOut, useSession } from "next-auth/react";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export function Header() {
   const { data: session } = useSession();
@@ -32,45 +28,45 @@ export function Header() {
             Community
           </Link>
 
-          <Drawer>
-            <DrawerTrigger>
-              {session && (
-                <img
-                  src={session.user?.image!}
-                  alt="user"
-                  className="w-10 h-10 rounded-full cursor-pointer ml-2 mb-2 hover:opacity-50"
-                />
-              )}
-
-              {!session ? (
-                <Button className="bg-black text-white hover:bg-black/90">
-                  Sign Up
-                </Button>
-              ) : null}
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle className="text-center">
-                  Do you want to Log Out?{" "}
-                </DrawerTitle>
-                <DrawerDescription className="text-center">
-                  This action cannot be undone.
-                </DrawerDescription>
-              </DrawerHeader>
-              <DrawerFooter>
-                <div>
-                  <Button
-                    onClick={() => {
-                      signOut();
-                    }}
-                  >
-                    Yes
-                  </Button>
-                </div>
-                <DrawerClose>Cancel</DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
+          {!session ? (
+            <span>
+              <Link
+                href={"/auth"}
+                className="bg-black text-white hover:bg-black/90 p-3 rounded-xl text-sm"
+              >
+                Sign Up
+              </Link>
+            </span>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                {session && (
+                  <img
+                    src={session.user?.image!}
+                    alt="user"
+                    className="w-10 h-10 rounded-full cursor-pointer ml-2 mb-2"
+                  />
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>
+                  <div className="font-normal">{session?.user?.name}</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <div>
+                    <button
+                      onClick={() => {
+                        signOut();
+                      }}
+                    >
+                      LogOut
+                    </button>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </nav>
       </div>
     </header>

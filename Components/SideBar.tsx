@@ -12,7 +12,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/Components/ui/drawer";
+} from "@/components/ui/drawer";
 import { Button } from "./ui/button";
 import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";

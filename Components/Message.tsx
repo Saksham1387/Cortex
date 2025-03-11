@@ -1,196 +1,428 @@
-import { DocumentData } from "firebase/firestore";
-import { useRouter } from "next/navigation";
+// "use client"
+// import { DocumentData } from "firebase/firestore";
+// import { useRouter } from "next/navigation";
+// import Image from "next/image";
+// import { Button } from "@/components/ui/button";
+// import ReactMarkdown from 'react-markdown';
+// import rehypeRaw from "rehype-raw";
+
+// type Props = {
+//   message: DocumentData;
+// };
+
+// const Message = ({ message }: Props) => {
+//   const isGPT = message.user.name === "SpaceGPT";
+
+//   console.log("----",message)
+//   return (
+//     <div className="items-center flex justify-center mt-3 w-full">
+//       <div className={`py-5 ${!isGPT ? "border-b" : ""}  max-w-5xl w-full p-5`}>
+//         <div className="flex space-x-5 pt-5 mx-auto">
+//           {/* User/Assistant icon */}
+//           <div className="flex-shrink-0 w-8 h-8 bg-black rounded-full flex items-center justify-center overflow-hidden">
+//             <img
+//               src={message.user.avatar}
+//               alt=""
+//               className="h-full w-full object-cover border-none"
+//             />
+//           </div>
+
+//           <div className="w-full">
+//             {/* Message text content */}
+//             <div className="pt-3 text-sm leading-relaxed">
+//               {(() => {
+//                 if (!message.text) return null;
+
+//                 // Get the content
+//                 const content = message.text;
+
+//                 // Check if it's a recommendation message with formatting patterns
+//                 if (content.includes("***")) {
+//                   // Parse the message structure more intelligently
+//                   // Find introduction - everything before the first product
+//                   const introEndIndex = content.indexOf("***");
+//                   const intro = content.substring(0, introEndIndex).trim();
+
+//                   // Find all product sections (they start with ***)
+//                   const regex = /\*\*\*(.*?):(.*?)(?=\*\*\*|$)/gs;
+//                   const matches = [...content.matchAll(regex)];
+
+//                   // Find conclusion - everything after the last product that isn't a product description
+//                   const lastProductEnd =
+//                     matches.length > 0
+//                       ? content.lastIndexOf(matches[matches.length - 1][0]) +
+//                         matches[matches.length - 1][0].length
+//                       : introEndIndex;
+//                   const conclusion = content
+//                     .substring(lastProductEnd)
+//                     .replace(/^\s*\*\s*/, "")
+//                     .trim();
+
+                   
+//                   return (
+//                     <div className="flex flex-col gap-4">
+//                       {/* Introduction */}
+//                       <p
+//                         className={`${!isGPT ? "text-white" : "text-gray-800"}`}
+//                       >
+//                          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{message.text}</ReactMarkdown>
+//                       </p>
+
+//                       {/* Product recommendations */}
+//                       <div
+//                         className={`space-y-3 px-4 py-3 ${
+//                           !isGPT ? " border-gray-700" : " border-gray-200"
+//                         } rounded-lg border`}
+//                       >
+//                         {matches.map((match, idx) => {
+//                           const productName = match[1].trim();
+//                           const productDesc = match[2].trim();
+
+//                           return (
+//                             <div
+//                               key={idx}
+//                               className={`pb-2 border-b ${
+//                                 !isGPT ? "border-gray-700" : "border-gray-200"
+//                               } last:border-0 last:pb-0`}
+//                             >
+//                               <div
+//                                 className={`font-bold ${
+//                                   !isGPT ? "text-blue-300" : "text-blue-600"
+//                                 }`}
+//                               >
+//                                 {productName}
+//                               </div>
+//                               <div
+//                                 className={`${
+//                                   !isGPT ? "text-gray-300" : "text-gray-600"
+//                                 } pl-2 mt-1`}
+//                               >
+//                                 {productDesc}
+//                               </div>
+//                             </div>
+//                           );
+//                         })}
+//                       </div>
+
+//                       {/* Conclusion */}
+//                       {conclusion && (
+//                         <p
+//                           className={`italic ${
+//                             !isGPT ? "text-gray-300" : "text-gray-500"
+//                           }`}
+//                         >
+//                           {conclusion}
+//                         </p>
+//                       )}
+//                     </div>
+//                   );
+//                 }
+
+//                 // Default handling if no special formatting is needed
+//                 return <p className="whitespace-pre-line">{content}</p>;
+//               })()}
+//             </div>
+
+//             {/* Product recommendations section */}
+//             {isGPT && message.products && message.products.length > 0 && (
+//               <div className="flex flex-col gap-4 mt-4">
+//                 {/* Sort dropdown */}
+//                 <div className="flex justify-end mb-2">
+//                   <Button
+//                     variant="outline"
+//                     className="flex items-center gap-2 text-sm font-normal"
+//                   >
+//                     Sort results by
+//                     <svg
+//                       width="12"
+//                       height="12"
+//                       viewBox="0 0 15 15"
+//                       fill="none"
+//                       xmlns="http://www.w3.org/2000/svg"
+//                       className="ml-2"
+//                     >
+//                       <path
+//                         d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
+//                         fill="currentColor"
+//                         fillRule="evenodd"
+//                         clipRule="evenodd"
+//                       ></path>
+//                     </svg>
+//                   </Button>
+//                 </div>
+
+//                 {/* Product grid */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//                   {message.products
+//                     .slice(0, 8)
+//                     .map((product: any, index: number) => (
+//                       <div
+//                         key={index}
+//                         className="flex flex-col border-none rounded-lg overflow-hidden "
+//                       >
+//                         <div className="aspect-square relative">
+//                           {product.thumbnail && (
+//                             <div className="w-full h-full relative rounded-xl p-2">
+//                               <Image
+//                                 src={product.thumbnail}
+//                                 width={100}
+//                                 height={100}
+//                                 alt={product.title || "Product image"}
+//                                 className="w-full h-full object-cover rounded-xl"
+//                               />
+
+//                               {product.tag && (
+//                                 <div className="">
+//                                   <div className="absolute top-2 right-2 bg-gray-100 text-xs px-2 py-1 rounded-full ">
+//                                     {product.tag}
+//                                   </div>
+//                                 </div>
+//                               )}
+//                             </div>
+//                           )}
+//                         </div>
+//                         <div className="p-3 bg-transparent">
+//                           <div className="flex justify-between items-start">
+//                             <div className="font-medium text-gray-900">
+//                               {product.price || ""}
+//                             </div>
+//                             <div className="text-xs text-gray-500">
+//                               {product.source || ""}
+//                             </div>
+//                           </div>
+//                           <div className="text-sm text-gray-900 mt-1 line-clamp-2">
+//                             {product.title || "Product Name"}
+//                           </div>
+//                           <div className="mt-2">
+//                             <button
+//                               onClick={() => {
+//                                 window.open(product.product_link, "_blank");
+//                               }}
+//                               className="w-ful text-gray-500 text-xs font-medium rounded transition-colors"
+//                             >
+//                               Click for details
+//                             </button>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     ))}
+//                 </div>
+
+//                 {/* Tags at the bottom */}
+//                 <div className="flex flex-wrap gap-2 mt-2">
+//                   <span className="text-xs bg-gray-100 px-3 py-1.5 rounded-full">
+//                     Cortex
+//                   </span>
+//                   {message.tags &&
+//                     message.tags.map((tag: string, index: number) => (
+//                       <span
+//                         key={index}
+//                         className="text-xs bg-gray-100 px-3 py-1.5 rounded-full"
+//                       >
+//                         {tag}
+//                       </span>
+//                     ))}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Message;
+
+"use client"
+import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+
+// Firebase imports
+import { getFirestore, doc, getDoc, DocumentData } from 'firebase/firestore';
 
 type Props = {
-  message: DocumentData;
+  messageId?: string;
+  message?: DocumentData;
 };
 
-const Message = ({ message }: Props) => {
-  const isGPT = message.user.name === "SpaceGPT";
+const MessageMarkdownRenderer = ({ messageId, message: initialMessage }: Props) => {
+  const [message, setMessage] = useState<DocumentData | null>(initialMessage || null);
+  const [loading, setLoading] = useState(!initialMessage && !!messageId);
+  const [error, setError] = useState<string | null>(null);
+  
   const router = useRouter();
-  const formatPrice = (price: string) => {
-    return price;
-  };
+  
+  useEffect(() => {
+    // Only fetch if we have a messageId but no initial message
+    if (messageId && !initialMessage) {
+      const fetchMessage = async () => {
+        try {
+          setLoading(true);
+          
+          const db = getFirestore();
+          const messageRef = doc(db, 'messages', messageId);
+          const messageSnap = await getDoc(messageRef);
+          
+          if (messageSnap.exists()) {
+            setMessage(messageSnap.data());
+          } else {
+            setError('Message not found');
+          }
+        } catch (err) {
+          console.error('Error fetching message:', err);
+          setError('Failed to load message');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchMessage();
+    }
+  }, [messageId, initialMessage]);
+  
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading message...</div>;
+  }
+  
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>;
+  }
+  
+  if (!message) {
+    return <div className="p-4">No message data available</div>;
+  }
 
-  console.log("data", message.products);
+  const isGPT = message.user?.name === "SpaceGPT";
+  
   return (
     <div className="items-center flex justify-center mt-3 w-full">
-      <div
-        className={`py-5 text-white ${
-          !isGPT && "bg-[#434654]"
-        } rounded-xl max-w-[700px] w-full p-5`}
-      >
-        <div className="flex space-x-5 pt-5 max-w-2xl mx-auto">
-          <img
-            src={message.user.avatar}
-            alt=""
-            className="h-8 w-8 rounded-full"
-          />
+      <div className={`py-5 ${!isGPT ? "border-b" : ""} max-w-5xl w-full p-5`}>
+        <div className="flex space-x-5 pt-5 mx-auto">
+          {/* User/Assistant icon */}
+          <div className="flex-shrink-0 w-8 h-8 bg-black rounded-full flex items-center justify-center overflow-hidden">
+            {message.user?.avatar && (
+              <img
+                src={message.user.avatar}
+                alt=""
+                className="h-full w-full object-cover border-none"
+              />
+            )}
+          </div>
+
           <div className="w-full">
+            {/* Message text content */}
             <div className="pt-3 text-sm leading-relaxed">
-              {(() => {
-                if (!message.text) return null;
-
-                // Get the content
-                const content = message.text;
-
-                // Check if it's a recommendation message with formatting patterns
-                if (content.includes("***")) {
-                  // Parse the message structure more intelligently
-                  // Find introduction - everything before the first product
-                  const introEndIndex = content.indexOf("***");
-                  const intro = content.substring(0, introEndIndex).trim();
-
-                  // Find all product sections (they start with ***)
-                  const regex = /\*\*\*(.*?):(.*?)(?=\*\*\*|$)/gs;
-                  const matches = [...content.matchAll(regex)];
-
-                  // Find conclusion - everything after the last product that isn't a product description
-                  const lastProductEnd =
-                    matches.length > 0
-                      ? content.lastIndexOf(matches[matches.length - 1][0]) +
-                        matches[matches.length - 1][0].length
-                      : introEndIndex;
-                  const conclusion = content
-                    .substring(lastProductEnd)
-                    .replace(/^\s*\*\s*/, "")
-                    .trim();
-
-                  return (
-                    <div className="space-y-4">
-                      {/* Introduction */}
-                      <p className="text-white">{intro}</p>
-
-                      {/* Product recommendations */}
-                      <div className="space-y-3 px-4 py-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                        {matches.map((match, idx) => {
-                          const productName = match[1].trim();
-                          const productDesc = match[2].trim();
-
-                          return (
-                            <div
-                              key={idx}
-                              className="pb-2 border-b border-gray-700 last:border-0 last:pb-0"
-                            >
-                              <div className="font-bold text-blue-300">
-                                {productName}
-                              </div>
-                              <div className="text-gray-300 pl-2 mt-1">
-                                {productDesc}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Conclusion */}
-                      {conclusion && (
-                        <p className="text-gray-300 italic">{conclusion}</p>
-                      )}
-                    </div>
-                  );
-                }
-
-                // Default handling if no special formatting is needed
-                return <p className="whitespace-pre-line">{content}</p>;
-              })()}
+              {message.text ? (
+                <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                  {message.text}
+                </ReactMarkdown>
+              ) : null}
             </div>
 
-            {isGPT && message.products && (
-              <div className="mt-4">
-                <div className="mt-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h2 className="text-lg font-semibold">
-                      Recommended Products
-                    </h2>
-                    <div className="relative">
-                      <select className="appearance-none bg-white text-gray-800 py-1 px-3 pr-8 rounded border border-gray-300 focus:outline-none">
-                        <option>Sort results by</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Newest</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg
-                          className="fill-current h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
+            {/* Product recommendations section */}
+            {isGPT && message.products && message.products.length > 0 && (
+              <div className="flex flex-col gap-4 mt-4">
+                {/* Sort dropdown */}
+                <div className="flex justify-end mb-2">
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 text-sm font-normal"
+                  >
+                    Sort results by
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 15 15"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="ml-2"
+                    >
+                      <path
+                        d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
+                        fill="currentColor"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </Button>
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {message.products && message.products.length > 0
-                      ? message.products.slice(0, 7).map((product, index) => {
-                          const hasDiscount =
-                            product.old_price && product.price;
-                          return (
-                            <div
-                              key={index}
-                              className="bg-white text-gray-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                            >
-                              <div className="relative h-64 bg-gray-200">
-                                {product.thumbnail && (
-                                  <img
-                                    src={product.thumbnail}
-                                    alt={product.title || "Product image"}
-                                    className="w-full h-full object-cover"
-                                  />
-                                )}
-                                {product.tag && (
-                                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                {/* Product grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {message.products
+                    .slice(0, 8)
+                    .map((product: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex flex-col border-none rounded-lg overflow-hidden"
+                      >
+                        <div className="aspect-square relative">
+                          {product.thumbnail && (
+                            <div className="w-full h-full relative rounded-xl p-2">
+                              <Image
+                                src={product.thumbnail}
+                                width={100}
+                                height={100}
+                                alt={product.title || "Product image"}
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+
+                              {product.tag && (
+                                <div className="">
+                                  <div className="absolute top-2 right-2 bg-gray-100 text-xs px-2 py-1 rounded-full">
                                     {product.tag}
                                   </div>
-                                )}
-                              </div>
-                              <div className="p-4">
-                                <div className="flex items-center mb-2">
-                                  {product.source_icon && (
-                                    <img
-                                      src={product.source_icon}
-                                      alt={product.source || "Brand"}
-                                      className="h-4 w-4 mr-2"
-                                    />
-                                  )}
-                                  <div className="text-xs text-gray-500">
-                                    {product.source || ""}
-                                  </div>
                                 </div>
-                                <h3 className="font-medium text-sm mt-1 line-clamp-2 h-10">
-                                  {product.title || "Product Name"}
-                                </h3>
-                                <div className="mt-3 flex items-center">
-                                  <div className="font-semibold">
-                                    {product.price || ""}
-                                  </div>
-                                  {hasDiscount && (
-                                    <div className="ml-2 text-xs text-gray-500 line-through">
-                                      {product.old_price}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="mt-3">
-                                  <button
-                                    onClick={() => {
-                                      window.open(
-                                        product.product_link,
-                                        "_blank"
-                                      );
-                                    }}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
-                                  >
-                                    View Product
-                                  </button>
-                                </div>
-                              </div>
+                              )}
                             </div>
-                          );
-                        })
-                      : null}
-                  </div>
+                          )}
+                        </div>
+                        <div className="p-3 bg-transparent">
+                          <div className="flex justify-between items-start">
+                            <div className="font-medium text-gray-900">
+                              {product.price || ""}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {product.source || ""}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-900 mt-1 line-clamp-2">
+                            {product.title || "Product Name"}
+                          </div>
+                          <div className="mt-2">
+                            <button
+                              onClick={() => {
+                                window.open(product.product_link, "_blank");
+                              }}
+                              className="w-full text-gray-500 text-xs font-medium rounded transition-colors"
+                            >
+                              Click for details
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Tags at the bottom */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="text-xs bg-gray-100 px-3 py-1.5 rounded-full">
+                    Cortex
+                  </span>
+                  {message.tags &&
+                    message.tags.map((tag: string, index: number) => (
+                      <span
+                        key={index}
+                        className="text-xs bg-gray-100 px-3 py-1.5 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                 </div>
               </div>
             )}
@@ -201,4 +433,4 @@ const Message = ({ message }: Props) => {
   );
 };
 
-export default Message;
+export default MessageMarkdownRenderer;
