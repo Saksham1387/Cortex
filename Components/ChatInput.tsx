@@ -7,13 +7,16 @@ import toast from "react-hot-toast";
 
 type Props = {
   chatId: string;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 };
 
-const ChatInput = ({ chatId }: Props) => {
+const ChatInput = ({ chatId, loading, setLoading }: Props) => {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState("");
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
+    setLoading(true)
     e.preventDefault();
     if (!prompt) return;
     const input = prompt.trim();
@@ -43,6 +46,7 @@ const ChatInput = ({ chatId }: Props) => {
         session,
       }),
     }).then(() => {
+      setLoading(false)
       toast.success("Message Sent", {
         id: notification,
       });
@@ -70,7 +74,7 @@ const ChatInput = ({ chatId }: Props) => {
             />
             <div className="flex items-center gap-2 ml-3">
               <button
-                disabled={!session || prompt.length === 0}
+                disabled={!session || prompt.length === 0 || loading}
                 className="bg-transparent text-black p-2 rounded-full transition-all disabled:opacity-50"
                 type="submit"
               >

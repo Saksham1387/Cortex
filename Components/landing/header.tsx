@@ -9,9 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function Header() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#fafafa]">
@@ -41,9 +44,11 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger>
                 {session && (
-                  <img
-                    src={session.user?.image!}
+                  <Image
+                    src={session.user.image || ""}
                     alt="user"
+                    width={100}
+                    height={100}
                     className="w-10 h-10 rounded-full cursor-pointer ml-2 mb-2"
                   />
                 )}
@@ -53,6 +58,17 @@ export function Header() {
                   <div className="font-normal">{session?.user?.name}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <div>
+                    <button
+                      onClick={() => {
+                        router.push("/profile");
+                      }}
+                    >
+                      Profile
+                    </button>
+                  </div>
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <div>
                     <button

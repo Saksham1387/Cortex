@@ -53,6 +53,7 @@ export function SearchBar() {
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
             <GiClothes className="h-6 w-6 text-muted-foreground" />
           </div>
+          <form action="" onSubmit={handleSubmit}>
           <Input
             value={input}
             onChange={(e) => {
@@ -64,11 +65,12 @@ export function SearchBar() {
           />
           <Button
             size="icon"
+            type="submit"
             className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 bg-gray-200 hover:bg-gray-300 text-gray-700"
-            onClick={handleSubmit}
           >
             <ArrowUp className="h-4 w-4" />
           </Button>
+          </form>
         </div>
       )}
     </div>

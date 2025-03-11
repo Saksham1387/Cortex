@@ -7,14 +7,17 @@ import { useEffect, useRef } from "react";
 import Message from "./Message";
 import { ArrowDownIcon } from "@heroicons/react/24/outline";
 import { MessageSkeleton, ProductsSkeleton } from "./skeletons/chat";
+import ThinkingAnimation from "./ThinkingAnimation";
 
 type Props = {
   chatId: string;
+  loading: boolean;
 };
 
-const Chat = ({ chatId }: Props) => {
+const Chat = ({ chatId, loading }: Props) => {
+  console.log(loading);
   const { data: session } = useSession();
-  const [messages, loading, error] = useCollection(
+  const [messages, fetching, error] = useCollection(
     session &&
       query(
         collection(
@@ -39,7 +42,7 @@ const Chat = ({ chatId }: Props) => {
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden">
-      {loading && (
+      {fetching && (
         <>
           <MessageSkeleton />
           <MessageSkeleton />
@@ -53,7 +56,7 @@ const Chat = ({ chatId }: Props) => {
         </p>
       )}
 
-      {messages?.empty && !loading && (
+      {messages?.empty && !fetching && (
         <div className="flex flex-col items-center justify-center h-full max-w-xl mx-auto px-4 py-8 text-black font-serif">
           <div className=" rounded-lg p-6 text-center w-full">
             <h3 className="text-xl font-semibold text-black mb-4">
@@ -71,6 +74,9 @@ const Chat = ({ chatId }: Props) => {
       {messages?.docs.map((message) => (
         <Message key={message.id} message={message.data()} />
       ))}
+
+      {/* Add the thinking animation when loading is true */}
+      {loading ? <ThinkingAnimation /> : null}
 
       <div ref={chatEndRef}></div>
     </div>
