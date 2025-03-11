@@ -3,9 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
 import { Header } from "@/components/landing/header";
 import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { authOptions } from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,19 +20,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
-
-  console.log(session);
   return (
     <html lang="en">
       <head></head>
       <Providers session={session}>
         <body className={`${inter.className} font-serif`}>
-
           <Header />
-
           {children}
           <HistoryDrawer />
-
         </body>
       </Providers>
     </html>

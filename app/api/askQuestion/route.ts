@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generatePrompt, generateQueryPrompt } from "@/app/prompts";
-const SerpApi = require("google-search-results-nodejs");
+import { checkRequestLimit, incrementRequestCount } from "@/lib/db";
 const { getJson } = require("serpapi");
 
 type Message = {
@@ -25,91 +25,101 @@ const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
 const MAX_CONTEXT_MESSAGES = 10;
 
 export async function POST(request: Request, res: NextApiResponse) {
-  const { prompt, chatId, session } = await request.json();
+  try {
+    const { prompt, chatId, session } = await request.json();
 
-  // Create the user message
-  const userMessage: Message = {
-    text: prompt,
-    createdAt: admin.firestore.Timestamp.now(),
-    user: {
-      _id: session.user.email,
-      name: session.user.name,
-      avatar: session.user.image,
-    },
-  };
+    const hasQuotaRemaining = await checkRequestLimit(session.user.id);
 
-  // Fetch previous messages for context
-  const messagesRef = adminDB
-    .collection("users")
-    .doc(session?.user?.email)
-    .collection("chats")
-    .doc(chatId)
-    .collection("messages");
+    if (!hasQuotaRemaining) {
+      return NextResponse.json(
+        {
+          answer:
+            "You've reached the maximum number of free requests. Please upgrade to premium to continue.",
+          error: "QUOTA_EXCEEDED",
+        },
+        { status: 402 }
+      ); // 402 Payment Required
+    }
 
-  const prevMessagesSnapshot = await messagesRef
-    .orderBy("createdAt", "desc")
-    .limit(MAX_CONTEXT_MESSAGES)
-    .get();
-
-  const previousMessages: Message[] = [];
-  prevMessagesSnapshot.docs.forEach((doc) => {
-    previousMessages.push(doc.data() as Message);
-  });
-
-  // Reverse to get chronological order
-  previousMessages.reverse();
-
-  // First, generate an optimized search query using the LLM
-  const queryPrompt = generateQueryPrompt(prompt, previousMessages);
-
-  const queryResult = await model.generateContent([queryPrompt]);
-
-  const optimizedQuery = queryResult.response.text().trim();
-
-  console.log(optimizedQuery);
-  // Use the optimized query for SerpAPI
-  const searchPromise = new Promise((resolve, reject) => {
-    getJson(
-      {
-        engine: "google_shopping",
-        q: optimizedQuery,
-        location: "India",
-        api_key: process.env.SERP_API,
+    const userMessage: Message = {
+      text: prompt,
+      createdAt: admin.firestore.Timestamp.now(),
+      user: {
+        _id: session.user.email,
+        name: session.user.name,
+        avatar: session.user.image,
       },
-      (json: any) => {
-        resolve(json["shopping_results"]);
-      }
+    };
+
+    const messagesRef = adminDB
+      .collection("users")
+      .doc(session?.user?.email)
+      .collection("chats")
+      .doc(chatId)
+      .collection("messages");
+
+    const prevMessagesSnapshot = await messagesRef
+      .orderBy("createdAt", "desc")
+      .limit(MAX_CONTEXT_MESSAGES)
+      .get();
+
+    const previousMessages: Message[] = [];
+    prevMessagesSnapshot.docs.forEach((doc) => {
+      previousMessages.push(doc.data() as Message);
+    });
+
+    previousMessages.reverse();
+
+    const queryPrompt = generateQueryPrompt(prompt, previousMessages);
+    const queryResult = await model.generateContent([queryPrompt]);
+    const optimizedQuery = queryResult.response.text().trim();
+
+    const searchPromise = new Promise((resolve, reject) => {
+      getJson(
+        {
+          engine: "google_shopping",
+          q: optimizedQuery,
+          location: "India",
+          api_key: process.env.SERP_API,
+        },
+        (json: any) => {
+          resolve(json["shopping_results"]);
+        }
+      );
+    });
+
+    const searchRes = await searchPromise;
+    const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
+    const result = await model.generateContent([llmPrompt]);
+    await messagesRef.add(userMessage);
+
+    const message: Message = {
+      text: result.response.text() || "Sorry, I don't understand",
+      products: searchRes,
+      createdAt: admin.firestore.Timestamp.now(),
+      user: {
+        _id: "SpaceGPT",
+        name: "SpaceGPT",
+        avatar:
+          "https://gold-legislative-tuna-190.mypinata.cloud/ipfs/bafkreig4sc5zimeoqftn3i6danbeeoxegywjznhpzkmhqe4mwnd356rjhq",
+      },
+    };
+
+    await messagesRef.add(message);
+    await incrementRequestCount(session.user.id);
+
+    return NextResponse.json({
+      answer: message.text as string,
+      searchQuery: optimizedQuery,
+    });
+  } catch (e) {
+    console.error("Error processing request:", e);
+    return NextResponse.json(
+      {
+        answer: "Sorry, there was an error processing your request.",
+        error: "PROCESSING_ERROR",
+      },
+      { status: 500 }
     );
-  });
-
-  const searchRes = await searchPromise;
-
-  // Generate prompt with context
-  const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
-
-  // Generate response with context-aware prompt
-  const result = await model.generateContent([llmPrompt]);
-
-  // Save the user message first
-  await messagesRef.add(userMessage);
-
-  // Create and save the AI response
-  const message: Message = {
-    text: result.response.text() || "Sorry, I don't understand",
-    products: searchRes, // Store the search results
-    createdAt: admin.firestore.Timestamp.now(),
-    user: {
-      _id: "SpaceGPT",
-      name: "SpaceGPT",
-      avatar:
-        "https://gold-legislative-tuna-190.mypinata.cloud/ipfs/bafkreig4sc5zimeoqftn3i6danbeeoxegywjznhpzkmhqe4mwnd356rjhq",
-    },
-  };
-
-  await messagesRef.add(message);
-
-  return NextResponse.json({
-    answer: message.text as string,
-    searchQuery: optimizedQuery, // Return the optimized query for debugging
-  });
+  }
 }
