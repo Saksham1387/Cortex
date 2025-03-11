@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { Header } from "@/components/landing/header";
+import { HistoryDrawer } from "@/components/HistoryDrawer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,8 +27,12 @@ export default async function RootLayout({
       <head></head>
       <Providers session={session}>
         <body className={`${inter.className} font-serif`}>
+
           <Header />
+
           {children}
+          <HistoryDrawer />
+
         </body>
       </Providers>
     </html>

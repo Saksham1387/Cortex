@@ -21,7 +21,6 @@ type Message = {
 const client = new GoogleGenerativeAI(process.env.GEMINI_API || "");
 const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const search = new SerpApi.GoogleSearch();
 // Number of previous messages to include as context
 const MAX_CONTEXT_MESSAGES = 10;
 
@@ -62,7 +61,9 @@ export async function POST(request: Request, res: NextApiResponse) {
 
   // First, generate an optimized search query using the LLM
   const queryPrompt = generateQueryPrompt(prompt, previousMessages);
+
   const queryResult = await model.generateContent([queryPrompt]);
+
   const optimizedQuery = queryResult.response.text().trim();
 
   console.log(optimizedQuery);
@@ -83,8 +84,6 @@ export async function POST(request: Request, res: NextApiResponse) {
 
   const searchRes = await searchPromise;
 
-  console.log(searchRes);
-
   // Generate prompt with context
   const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
 
@@ -102,7 +101,8 @@ export async function POST(request: Request, res: NextApiResponse) {
     user: {
       _id: "SpaceGPT",
       name: "SpaceGPT",
-      avatar: "https://ui-avatars.com/api/?name=AI",
+      avatar:
+        "https://gold-legislative-tuna-190.mypinata.cloud/ipfs/bafkreig4sc5zimeoqftn3i6danbeeoxegywjznhpzkmhqe4mwnd356rjhq",
     },
   };
 
