@@ -54,7 +54,7 @@ export function HistoryDrawer() {
 
   useEffect(() => {
     // Track mouse pointer, open if it's on the left over the drawer
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e:any) => {
       if (e.clientX < 40) {
         setIsOpen(true);
       }
@@ -74,7 +74,7 @@ export function HistoryDrawer() {
     <Drawer open={isOpen} onOpenChange={setIsOpen} direction="left">
       <DrawerContent
         style={{ maxWidth: DRAWER_WIDTH, height: "91.5vh" }}
-        className="bg-[#fafafa] flex flex-col border-r border"
+        className="bg-stone-100 flex flex-col border"
       >
         <DrawerHeader className="p-4 space-y-4">
           <div className="pt-2 font-serif text-lg">Search History</div>
