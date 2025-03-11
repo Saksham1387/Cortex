@@ -54,7 +54,7 @@ const ChatInput = ({ chatId }: Props) => {
       <div className="flex items-center justify-center mb-3">
         <div className="bg-white rounded-full w-[800px] flex justify-center items-center h-[58px] relative border border-gray-200 shadow-xl">
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-            <MessageCircle className="w-5 h-5 text-gray-300" />
+            <MessageCircle className="w-5 h-5 text-gray-500" />
           </div>
           <form
             onSubmit={sendMessage}
