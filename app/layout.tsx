@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { Header } from "@/components/landing/header";
 import { HistoryDrawer } from "@/components/HistoryDrawer";
 import { authOptions } from "@/lib/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) { 
   const session = await getServerSession(authOptions);
   return (
     <html lang="en">
@@ -29,6 +30,7 @@ export default async function RootLayout({
           {children}
           <HistoryDrawer />
         </body>
+        <Toaster />
       </Providers>
     </html>
   );

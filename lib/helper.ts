@@ -1,13 +1,11 @@
-import { NextApiResponse } from "next";
-import { NextResponse } from "next/server";
 const { getJson } = require("serpapi");
 
 const cache = new Map();
 
-export async function GET(request: Request, res: NextApiResponse) {
+export async function getTrendingSection() {
   const cacheKey = "trending";
   if (cache.has(cacheKey)) {
-    return NextResponse.json({ data: cache.get(cacheKey), cached: true });
+    return { data: cache.get(cacheKey) };
   }
   const trendingQuery = "trending clothes fashion industry 2025";
   const searchPromise = new Promise((resolve, reject) => {
@@ -28,7 +26,7 @@ export async function GET(request: Request, res: NextApiResponse) {
 
   cache.set(cacheKey, searchRes);
 
-  return NextResponse.json({
+  return {
     data: searchRes,
-  });
+  };
 }

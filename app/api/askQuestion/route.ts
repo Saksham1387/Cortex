@@ -28,18 +28,18 @@ export async function POST(request: Request, res: NextApiResponse) {
   try {
     const { prompt, chatId, session } = await request.json();
 
-    const hasQuotaRemaining = await checkRequestLimit(session.user.id);
+    // const hasQuotaRemaining = await checkRequestLimit(session.user.id);
 
-    if (!hasQuotaRemaining) {
-      return NextResponse.json(
-        {
-          answer:
-            "You've reached the maximum number of free requests. Please upgrade to premium to continue.",
-          error: "QUOTA_EXCEEDED",
-        },
-        { status: 402 }
-      ); // 402 Payment Required
-    }
+    // if (!hasQuotaRemaining) {
+    //   return NextResponse.json(
+    //     {
+    //       answer:
+    //         "You've reached the maximum number of free requests. Please upgrade to premium to continue.",
+    //       error: "QUOTA_EXCEEDED",
+    //     },
+    //     { status: 402 }
+    //   ); // 402 Payment Required
+    // }
 
     const userMessage: Message = {
       text: prompt,
@@ -74,6 +74,7 @@ export async function POST(request: Request, res: NextApiResponse) {
     const queryResult = await model.generateContent([queryPrompt]);
     const optimizedQuery = queryResult.response.text().trim();
 
+    console.log(optimizedQuery)
     const searchPromise = new Promise((resolve, reject) => {
       getJson(
         {
