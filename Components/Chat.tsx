@@ -15,7 +15,6 @@ type Props = {
 };
 
 const Chat = ({ chatId, loading }: Props) => {
-  console.log(loading);
   const { data: session } = useSession();
   const [messages, fetching, error] = useCollection(
     session &&
@@ -31,6 +30,7 @@ const Chat = ({ chatId, loading }: Props) => {
         orderBy("createdAt", "asc")
       )
   );
+
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -74,8 +74,7 @@ const Chat = ({ chatId, loading }: Props) => {
       {messages?.docs.map((message) => (
         <Message key={message.id} message={message.data()} />
       ))}
-
-      {/* Add the thinking animation when loading is true */}
+      
       {loading ? <ThinkingAnimation /> : null}
 
       <div ref={chatEndRef}></div>

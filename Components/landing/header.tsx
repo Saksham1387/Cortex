@@ -17,7 +17,7 @@ export function Header() {
   const router = useRouter();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-[#fafafa]">
+    <header className="fixed w-full border-b bg-[#fafafa] mb-10  z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="font-serif text-xl font-medium">
           CortexQ

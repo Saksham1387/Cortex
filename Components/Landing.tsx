@@ -3,8 +3,14 @@ import { TrendingSection } from "@/components/landing/trending-section";
 import { QuickLinks } from "@/components/landing/quick-links";
 import { Greeting } from "./Greetings";
 import TypewriterEffect from "./landing/typewriter-effect";
+import { getServerSession } from "next-auth";
+import { getTrendingSection } from "@/lib/helper";
 
-export default function Landing() {
+export default async function Landing() {
+  const session = await getServerSession();
+  const res = await getTrendingSection();
+  const trendingItems = res.data;
+
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafa]">
       <main className="flex-1 container mx-auto px-4 py-8 pt-36 ">
@@ -34,7 +40,7 @@ export default function Landing() {
           <QuickLinks />
         </div>
         <div className="mt-28">
-          <TrendingSection />
+          <TrendingSection trendingItems={trendingItems} />
         </div>
       </main>
     </div>

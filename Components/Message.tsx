@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
 
 type Props = {
   messageId?: string;
@@ -20,6 +22,14 @@ type Props = {
 };
 
 type SortOption = "default" | "low-to-high" | "high-to-low";
+
+type TLikedProduct = {
+  product_id: string;
+  thumbnail: string;
+  product_link: string;
+  title: string;
+  price: string;
+};
 
 const MessageMarkdownRenderer = ({
   messageId,
@@ -33,6 +43,7 @@ const MessageMarkdownRenderer = ({
   const [displayCount, setDisplayCount] = useState(8);
   const [sortOption, setSortOption] = useState<SortOption>("default");
   const [sortedProducts, setSortedProducts] = useState<any[]>([]);
+  const [likedProducts, setLikedProducts] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -87,6 +98,39 @@ const MessageMarkdownRenderer = ({
     }
   }, [message, sortOption]);
 
+  const handleLike = async (product: any) => {
+    try {
+      const productId = product.id || `product-${Date.now()}`;
+
+      // Prepare the data to be sent to the API
+      const likedProduct: TLikedProduct = {
+        product_id: productId,
+        thumbnail: product.thumbnail || "",
+        product_link: product.product_link || "",
+        title: product.title || "",
+        price: product.price || "",
+      };
+
+      // Make the API call
+      const response = await fetch("/api/like", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(likedProduct),
+      });
+
+      if (response) {
+        toast("Liked!", {});
+        // Update local state to reflect the liked status
+      } else {
+        console.error("Failed to like product");
+      }
+    } catch (error) {
+      console.error("Error liking product:", error);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading message...</div>;
   }
@@ -133,7 +177,7 @@ const MessageMarkdownRenderer = ({
 
           <div className="w-full mb-">
             {/* Message text content */}
-            <div className=" text-sm leading-relaxed">
+            <div className="text-sm leading-relaxed">
               {message.text ? (
                 <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                   {message.text}
@@ -194,62 +238,87 @@ const MessageMarkdownRenderer = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {sortedProducts
                     .slice(0, displayCount)
-                    .map((product: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex flex-col border-none rounded-lg overflow-hidden"
-                      >
-                        <div className="aspect-square relative">
-                          <Link
-                            href={product.product_link}
-                            className="cursor-pointer"
-                          >
-                            {product.thumbnail && (
-                              <div className="w-full h-full relative rounded-xl p-2">
-                                <img
-                                  src={product.thumbnail}
-                                  width={100}
-                                  height={100}
-                                  alt={product.title || "Product image"}
-                                  className="w-full h-full object-cover rounded-xl"
-                                />
+                    .map((product: any, index: number) => {
+                      const productId = product.id || `product-${index}`;
+                      const isLiked = likedProducts.includes(productId);
 
-                                {product.tag && (
-                                  <div className="">
-                                    <div className="absolute top-2 right-2 bg-gray-100 text-xs px-2 py-1 rounded-full">
-                                      {product.tag}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </Link>
-                        </div>
-                        <div className="p-3 bg-transparent">
-                          <div className="flex justify-between items-start">
-                            <div className="font-medium text-gray-900">
-                              {product.price || ""}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {product.source || ""}
-                            </div>
-                          </div>
-                          <div className="text-sm text-gray-900 mt-1 line-clamp-2">
-                            {product.title || "Product Name"}
-                          </div>
-                          <div className="mt-2">
-                            <button
-                              onClick={() => {
-                                window.open(product.product_link, "_blank");
-                              }}
-                              className="w-full text-gray-500 text-xs font-medium rounded transition-colors"
+                      return (
+                        <div
+                          key={index}
+                          className="flex flex-col border-none rounded-lg overflow-hidden"
+                        >
+                          <div className="aspect-square relative">
+                            <Link
+                              href={product.product_link}
+                              className="cursor-pointer"
                             >
-                              Click for details
-                            </button>
+                              {product.thumbnail && (
+                                <div className="w-full h-full relative rounded-xl p-2">
+                                  <img
+                                    src={product.thumbnail}
+                                    width={100}
+                                    height={100}
+                                    alt={product.title || "Product image"}
+                                    className="w-full h-full object-cover rounded-xl"
+                                  />
+
+                                  {/* Like Button */}
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleLike(product);
+                                    }}
+                                    className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md transition-all hover:scale-110"
+                                    aria-label="Like product"
+                                  >
+                                    <Heart
+                                      size={18}
+                                      className={`${
+                                        isLiked
+                                          ? "fill-red-500 text-red-500"
+                                          : "text-gray-500"
+                                      }`}
+                                    />
+                                  </button>
+
+                                  {product.tag && (
+                                    <div className="">
+                                      <div className="absolute top-2 left-2 bg-gray-100 text-xs px-2 py-1 rounded-full">
+                                        {product.tag}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </Link>
+                          </div>
+                          <div className="p-3 bg-transparent">
+                            <div className="flex justify-between items-start">
+                              <div className="font-medium text-gray-900">
+                                {product.price || ""}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {product.source || ""}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-900 mt-1 line-clamp-2">
+                              {product.title || "Product Name"}
+                            </div>
+                            <div className="mt-2">
+                              <button
+                                onClick={() => {
+                                  window.open(product.product_link, "_blank");
+                                }}
+                                className="w-full text-gray-500 text-xs font-medium rounded transition-colors"
+                              >
+                                Click for details
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
                 {hasMoreProducts && (
                   <div className="flex justify-center mt-6">

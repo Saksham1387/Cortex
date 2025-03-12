@@ -16,30 +16,16 @@ type Titem = {
   product_link: string;
 };
 
-export function TrendingSection() {
-  const [trendingItems, setTrendingItems] = useState<Titem[]>([]);
+interface TrendingSectionProps {
+  trendingItems: Titem[];
+}
+
+export function TrendingSection({ trendingItems }: TrendingSectionProps) {
+  // const [trendingItems, setTrendingItems] = useState<Titem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
-  const fetchTrending = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("/api/trending");
-      if (res.data && res.data.data) {
-        setTrendingItems(res.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching trending items:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTrending();
-  }, []);
 
   const handlePrev = () => {
     if (scrollContainerRef.current) {
@@ -47,7 +33,9 @@ export function TrendingSection() {
         left: -scrollContainerRef.current.offsetWidth,
         behavior: "smooth",
       });
-      setCurrentIndex((prev) => (prev === 0 ? trendingItems.length - 1 : prev - 1));
+      setCurrentIndex((prev) =>
+        prev === 0 ? trendingItems.length - 1 : prev - 1
+      );
     }
   };
 
@@ -57,7 +45,9 @@ export function TrendingSection() {
         left: scrollContainerRef.current.offsetWidth,
         behavior: "smooth",
       });
-      setCurrentIndex((prev) => (prev === trendingItems.length - 1 ? 0 : prev + 1));
+      setCurrentIndex((prev) =>
+        prev === trendingItems.length - 1 ? 0 : prev + 1
+      );
     }
   };
 
@@ -93,7 +83,9 @@ export function TrendingSection() {
                   }`}
                 >
                   <Image
-                    src={item.thumbnail || "/placeholder.svg?height=400&width=400"}
+                    src={
+                      item.thumbnail || "/placeholder.svg?height=400&width=400"
+                    }
                     alt={item.title || "Trending product"}
                     fill
                     sizes="200px"
@@ -101,7 +93,9 @@ export function TrendingSection() {
                   />
                 </div>
                 <div className="flex flex-col max-w-[200px]">
-                  <h3 className="text-xs text-gray-700 line-clamp-2">{item.title}</h3>
+                  <h3 className="text-xs text-gray-700 line-clamp-2">
+                    {item.title}
+                  </h3>
                 </div>
               </div>
             </Link>
