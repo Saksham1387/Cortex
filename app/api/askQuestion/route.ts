@@ -4,7 +4,8 @@ import admin from "firebase-admin";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generatePrompt, generateQueryPrompt } from "@/app/prompts";
-import { checkRequestLimit, incrementRequestCount } from "@/lib/db";
+import { incrementRequestCount } from "@/lib/db";
+
 const { getJson } = require("serpapi");
 
 type Message = {
@@ -114,7 +115,6 @@ export async function POST(request: Request, res: NextApiResponse) {
       searchQuery: optimizedQuery,
     });
   } catch (e) {
-    console.error("Error processing request:", e);
     return NextResponse.json(
       {
         answer: "Sorry, there was an error processing your request.",
