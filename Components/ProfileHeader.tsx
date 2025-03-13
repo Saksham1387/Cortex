@@ -1,10 +1,269 @@
+// "use client";
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// import { Button } from "@/components/ui/button";
+// import { IUser } from "@/types/user";
+// import { Instagram, InstagramIcon, PenSquare, Share2 } from "lucide-react";
+// import Image from "next/image";
+// import { useState } from "react";
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipProvider,
+//   TooltipTrigger,
+// } from "./ui/tooltip";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
+// import { Label } from "./ui/label";
+// import { Input } from "./ui/input";
+// import { Textarea } from "@/components/ui/textarea";
+// import axios from "axios";
+// // Import TanStack React Query
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+// interface IProfileProps {
+//   user: IUser;
+// }
+
+// export const ProfileHeader = ({ user }: IProfileProps) => {
+//   const [showShareTooltip, setShowShareTooltip] = useState(false);
+//   const [showFullBio, setShowFullBio] = useState(false);
+//   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+//   // State for editable fields
+//   const [editFormData, setEditFormData] = useState({
+//     name: user.name || "",
+//     bio: user.bio || "",
+//     instagramId: user.instagramId || "",
+//     image: user.image || ""
+//   });
+  
+//   // Initialize the queryClient
+//   const queryClient = useQueryClient();
+
+//   // Create a mutation for updating the user
+//   const updateUserMutation = useMutation({
+//     mutationFn: async (userData: Partial<IUser>) => {
+//       const res = await axios.patch("/api/user", userData);
+//       return res.data;
+//     },
+//     onSuccess: () => {
+//       // Invalidate and refetch the user data after successful update
+//       queryClient.invalidateQueries({ queryKey: ['user', user.id] });
+//       setIsEditDialogOpen(false);
+//     },
+//     onError: (error) => {
+//       console.error("Error updating user:", error);
+//     }
+//   });
+
+//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+//     const { name, value } = e.target;
+//     setEditFormData(prev => ({
+//       ...prev,
+//       [name]: value
+//     }));
+//   };
+
+//   const handleUserUpdate = () => {
+//     updateUserMutation.mutate(editFormData);
+//   };
+
+//   const handleShare = () => {
+//     if (navigator.share) {
+//       navigator
+//         .share({
+//           title: user.name,
+//           url: `${window.location.href}/${user.id}`,
+//         })
+//         .catch((err) => console.error("Error sharing:", err));
+//     } else {
+//       if (navigator.clipboard) {
+//         navigator.clipboard.writeText(window.location.href);
+//         setShowShareTooltip(true);
+//         setTimeout(() => setShowShareTooltip(false), 2000);
+//       } else {
+//         console.error("Sharing and clipboard APIs not available");
+//       }
+//     }
+//   };
+
+//   return (
+//     <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
+//       <div className="flex items-center gap-6">
+//         <Avatar className="h-28 w-28 bg-gradient-to-br from-blue-200 to-green-200 flex items-center justify-center">
+//           {user.image ? (
+//             <Image
+//               src={user.image}
+//               alt={user.name}
+//               width={100}
+//               height={100}
+//               className="rounded-full object-cover"
+//             />
+//           ) : (
+//             <AvatarFallback className="text-3xl font-semibold">
+//               {user.name.charAt(0)}
+//             </AvatarFallback>
+//           )}
+//         </Avatar>
+//         <div className="flex flex-col">
+//           <div className="flex items-center gap-4">
+//             <h1 className="text-2xl font-medium">{user.name}</h1>
+//             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+//               <DialogTrigger asChild>
+//                 <Button variant="outline" size="sm" className="gap-2">
+//                   <PenSquare className="h-4 w-4" />
+//                   Edit Profile
+//                 </Button>
+//               </DialogTrigger>
+//               <DialogContent className="font-serif max-w-md p-6">
+//                 <DialogHeader>
+//                   <DialogTitle className="text-xl text-center">
+//                     Edit Profile
+//                   </DialogTitle>
+//                 </DialogHeader>
+//                 <div className="space-y-4 pt-4">
+//                   <div className="space-y-2">
+//                     <Label htmlFor="name">Display Name</Label>
+//                     <Input
+//                       id="name"
+//                       name="name"
+//                       placeholder="Your name"
+//                       className="px-3 py-2"
+//                       value={editFormData.name}
+//                       onChange={handleInputChange}
+//                     />
+//                   </div>
+                  
+//                   <div className="space-y-2">
+//                     <Label htmlFor="bio">Bio</Label>
+//                     <Textarea
+//                       id="bio"
+//                       name="bio"
+//                       placeholder="Tell people about yourself"
+//                       className="px-3 py-2 min-h-24"
+//                       value={editFormData.bio}
+//                       onChange={handleInputChange}
+//                     />
+//                   </div>
+                  
+//                   <div className="space-y-2">
+//                     <Label htmlFor="instagramId">Instagram Handle</Label>
+//                     <Input
+//                       id="instagramId"
+//                       name="instagramId"
+//                       placeholder="@example"
+//                       className="px-3 py-2"
+//                       value={editFormData.instagramId}
+//                       onChange={handleInputChange}
+//                     />
+//                   </div>
+                  
+//                   <div className="space-y-2">
+//                     <Label htmlFor="image">Profile Image URL</Label>
+//                     <Input
+//                       id="image"
+//                       name="image"
+//                       placeholder="https://example.com/image.jpg"
+//                       className="px-3 py-2"
+//                       value={editFormData.image}
+//                       onChange={handleInputChange}
+//                     />
+//                   </div>
+                  
+//                   <div className="flex items-center justify-center gap-4 pt-2">
+//                     <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+//                       Cancel
+//                     </Button>
+//                     <Button 
+//                       onClick={handleUserUpdate} 
+//                       disabled={updateUserMutation.isPending}
+//                     >
+//                       {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+//                     </Button>
+//                   </div>
+//                 </div>
+//               </DialogContent>
+//             </Dialog>
+//           </div>
+//           <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
+//             {user.bio ? (
+//               <>
+//                 {showFullBio ? user.bio : `${user.bio.slice(0, 70)}...`}
+//                 {user.bio.length > 70 && (
+//                   <button
+//                     onClick={() => setShowFullBio(!showFullBio)}
+//                     className="text-gray-500 text-xs"
+//                   >
+//                     {showFullBio ? "View Less" : "View More"}
+//                   </button>
+//                 )}
+//               </>
+//             ) : null}
+//           </div>
+//           <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
+//             <span>{user.followers.length} followers</span>
+//             <span>{user.following.length} following</span>
+//           </div>
+//         </div>
+//       </div>
+//       <div className="flex items-center gap-4 flex-col">
+//         <TooltipProvider>
+//           <Tooltip open={showShareTooltip}>
+//             <TooltipTrigger asChild>
+//               <Button variant="outline" onClick={handleShare}>
+//                 <Share2 size={16} className="mr-2" />
+//                 Share
+//               </Button>
+//             </TooltipTrigger>
+//             <TooltipContent>
+//               <p>Link copied!</p>
+//             </TooltipContent>
+//           </Tooltip>
+//         </TooltipProvider>
+//         {user.instagramId ? (
+//           <a
+//             href={`https://instagram.com/${user.instagramId}`}
+//             className="flex items-center gap-2 text-sm text-muted-foreground"
+//           >
+//             <Instagram className="h-5 w-5" />
+//             {user.instagramId}
+//           </a>
+//         ) : (
+//           <Button 
+//             variant="outline" 
+//             size="sm" 
+//             className="gap-2"
+//             onClick={() => {
+//               setIsEditDialogOpen(true);
+//               // Focus on Instagram field after a short delay to allow dialog to open
+//               setTimeout(() => {
+//                 const instagramInput = document.getElementById('instagramId');
+//                 if (instagramInput) {
+//                   instagramInput.focus();
+//                 }
+//               }, 100);
+//             }}
+//           >
+//             <InstagramIcon className="h-4 w-4" />
+//             Add Instagram
+//           </Button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 "use client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { IUser } from "@/types/user";
 import { Instagram, InstagramIcon, PenSquare, Share2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,32 +279,78 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
+// Import TanStack React Query
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface IProfileProps {
-  user: IUser;
+  initialUser: IUser;  // Renamed to initialUser for clarity
 }
-export const ProfileHeader = ({ user }: IProfileProps) => {
-  const [showShareTooltip, setShowShareTooltip] = useState(false);
-  const [instagram, setInstagram] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleUserUpdate = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.patch("/api/user", {
-        instagramId: instagram,
+export const ProfileHeader = ({ initialUser }: IProfileProps) => {
+  const [showShareTooltip, setShowShareTooltip] = useState(false);
+  const [showFullBio, setShowFullBio] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // Initialize the queryClient
+  const queryClient = useQueryClient();
+
+  // Use React Query to manage user data
+  // No need to fetch again if we already have the user data from server component
+  const { 
+    data: user, 
+    isLoading, 
+    error 
+  } = useQuery({
+    queryKey: ['user', initialUser.id],
+    // Here we don't need to fetch again since we already have the data
+    queryFn: async () => initialUser,
+    initialData: initialUser,
+    // Disable automatic refetching since we're working with server-provided data
+    staleTime: Infinity,
+  });
+
+  // State for editable fields
+  const [editFormData, setEditFormData] = useState({
+    name: initialUser.name || "",
+    bio: initialUser.bio || "",
+    instagramId: initialUser.instagramId || "",
+    image: initialUser.image || ""
+  });
+
+  // Create a mutation for updating the user
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: Partial<IUser>) => {
+      const res = await axios.patch("/api/user", userData);
+      return res.data;
+    },
+    onSuccess: (updatedUser) => {
+      // Update the user data in the cache
+      queryClient.setQueryData(['user', initialUser.id], (oldData: IUser) => {
+        return { ...oldData, ...updatedUser };
       });
-      if (res.status === 200) {
-        setLoading(false);
-      }
-    } catch (e) {
-      console.log(e);
+      
+      setIsEditDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
     }
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUserUpdate = () => {
+    updateUserMutation.mutate(editFormData);
   };
 
   const handleShare = () => {
-    console.log("here");
     if (navigator.share) {
       navigator
         .share({
@@ -63,6 +368,8 @@ export const ProfileHeader = ({ user }: IProfileProps) => {
       }
     }
   };
+
+  // We already have the user data from the server, so no loading or error states needed here
 
   return (
     <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
@@ -85,13 +392,97 @@ export const ProfileHeader = ({ user }: IProfileProps) => {
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-medium">{user.name}</h1>
-            <Button variant="outline" size="sm" className="gap-2">
-              <PenSquare className="h-4 w-4" />
-              Edit Profile
-            </Button>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <PenSquare className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="font-serif max-w-md p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-xl text-center">
+                    Edit Profile
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Display Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="Your name"
+                      className="px-3 py-2"
+                      value={editFormData.name}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      name="bio"
+                      placeholder="Tell people about yourself"
+                      className="px-3 py-2 min-h-24"
+                      value={editFormData.bio}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="instagramId">Instagram Handle</Label>
+                    <Input
+                      id="instagramId"
+                      name="instagramId"
+                      placeholder="@example"
+                      className="px-3 py-2"
+                      value={editFormData.instagramId}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="image">Profile Image URL</Label>
+                    <Input
+                      id="image"
+                      name="image"
+                      placeholder="https://example.com/image.jpg"
+                      className="px-3 py-2"
+                      value={editFormData.image}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-4 pt-2">
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleUserUpdate} 
+                      disabled={updateUserMutation.isPending}
+                    >
+                      {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
-            {user.bio ? `${user.bio?.slice(0, 70)}...` : null}
+            {user.bio ? (
+              <>
+                {showFullBio ? user.bio : `${user.bio.slice(0, 70)}...`}
+                {user.bio.length > 70 && (
+                  <button
+                    onClick={() => setShowFullBio(!showFullBio)}
+                    className="text-gray-500 text-xs"
+                  >
+                    {showFullBio ? "View Less" : "View More"}
+                  </button>
+                )}
+              </>
+            ) : null}
           </div>
           <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
             <span>{user.followers.length} followers</span>
@@ -119,49 +510,27 @@ export const ProfileHeader = ({ user }: IProfileProps) => {
             className="flex items-center gap-2 text-sm text-muted-foreground"
           >
             <Instagram className="h-5 w-5" />
-            {user.instagramId ? user.instagramId : "Add Instagram"}
+            {user.instagramId}
           </a>
         ) : (
-          <Dialog>
-            <DialogTrigger className="border p-2 text-sm rounded-md hover:bg-gray/90">
-              <div className="flex flex-row gap-2 justify-center items-center px-3">
-                Add <InstagramIcon className="w-5 h-5 " />
-              </div>
-            </DialogTrigger>
-            <DialogContent className="font-serif max-w-sm p-6">
-              <DialogHeader>
-                <DialogTitle className="text-thin text-center">
-                  Connect Instagram
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label>Display Name</Label>
-                  <Input
-                    placeholder="example"
-                    className="px-3 py-2"
-                    value={user.name}
-                  ></Input>
-                </div>
-                <div className="space-y-2">
-                  <Label>Instagram Handle</Label>
-                  <Input
-                    placeholder="@example"
-                    className="px-3 py-2"
-                    value={user.instagramId ? user.instagramId : instagram}
-                    onChange={(e) => {
-                      setInstagram(e.target.value);
-                    }}
-                  ></Input>
-                </div>
-                <div className="flex items-center justify-center">
-                  <Button onClick={handleUserUpdate} disabled={loading}>
-                    {loading ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2"
+            onClick={() => {
+              setIsEditDialogOpen(true);
+              // Focus on Instagram field after a short delay to allow dialog to open
+              setTimeout(() => {
+                const instagramInput = document.getElementById('instagramId');
+                if (instagramInput) {
+                  instagramInput.focus();
+                }
+              }, 100);
+            }}
+          >
+            <InstagramIcon className="h-4 w-4" />
+            Add Instagram
+          </Button>
         )}
       </div>
     </div>

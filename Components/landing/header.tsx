@@ -24,6 +24,9 @@ export function Header() {
         </Link>
 
         <nav className="flex items-center gap-6">
+        <Link href="/feed" className="text-sm font-medium">
+            Feed
+          </Link>
           <Link href="/pricing" className="text-sm font-medium">
             Pricing
           </Link>
