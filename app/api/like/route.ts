@@ -3,14 +3,6 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-type TLikedProduct = {
-  product_id: string;
-  thumbnail: string;
-  product_link: string;
-  title: string;
-  price: string;
-};
-
 export async function POST(req: NextRequest, res: NextResponse) {
   const session = await getServerSession(authOptions);
   if (!session) {
