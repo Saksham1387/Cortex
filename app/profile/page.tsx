@@ -15,7 +15,7 @@ export default async function Profile() {
   const user = await getUser(session?.user.id);
   return (
     <div className="container mx-auto max-w-6xl px-4 pt-28">
-      <ProfileHeader user={user as IUser} />
+      <ProfileHeader initialUser={user as IUser}/>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1 px-5">
           <Input
