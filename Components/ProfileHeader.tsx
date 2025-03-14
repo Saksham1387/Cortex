@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { IUser } from "@/types/user";
 import { Instagram, InstagramIcon, PenSquare, Share2 } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -22,68 +22,61 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
-// Import TanStack React Query
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface IProfileProps {
-  initialUser: IUser;  // Renamed to initialUser for clarity
+  initialUser: IUser; 
 }
 
 export const ProfileHeader = ({ initialUser }: IProfileProps) => {
   const [showShareTooltip, setShowShareTooltip] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
-  // Initialize the queryClient
+
   const queryClient = useQueryClient();
 
-  // Use React Query to manage user data
-  // No need to fetch again if we already have the user data from server component
-  const { 
-    data: user, 
-    isLoading, 
-    error 
+  const {
+    data: user,
+    isLoading,
+    error,
   } = useQuery({
-    queryKey: ['user', initialUser.id],
-    // Here we don't need to fetch again since we already have the data
+    queryKey: ["user", initialUser.id],
     queryFn: async () => initialUser,
     initialData: initialUser,
-    // Disable automatic refetching since we're working with server-provided data
     staleTime: Infinity,
   });
 
-  // State for editable fields
   const [editFormData, setEditFormData] = useState({
     name: initialUser.name || "",
     bio: initialUser.bio || "",
     instagramId: initialUser.instagramId || "",
-    image: initialUser.image || ""
+    image: initialUser.image || "",
   });
 
-  // Create a mutation for updating the user
   const updateUserMutation = useMutation({
     mutationFn: async (userData: Partial<IUser>) => {
       const res = await axios.patch("/api/user", userData);
       return res.data;
     },
     onSuccess: (updatedUser) => {
-      // Update the user data in the cache
-      queryClient.setQueryData(['user', initialUser.id], (oldData: IUser) => {
+      queryClient.setQueryData(["user", initialUser.id], (oldData: IUser) => {
         return { ...oldData, ...updatedUser };
       });
-      
+
       setIsEditDialogOpen(false);
     },
     onError: (error) => {
       console.error("Error updating user:", error);
-    }
+    },
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -109,8 +102,6 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
       }
     }
   };
-
-  // We already have the user data from the server, so no loading or error states needed here
 
   return (
     <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
@@ -158,7 +149,7 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="bio">Bio</Label>
                     <Textarea
@@ -170,7 +161,7 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="instagramId">Instagram Handle</Label>
                     <Input
@@ -182,7 +173,7 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="image">Profile Image URL</Label>
                     <Input
@@ -194,16 +185,21 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-center gap-4 pt-2">
-                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditDialogOpen(false)}
+                    >
                       Cancel
                     </Button>
-                    <Button 
-                      onClick={handleUserUpdate} 
+                    <Button
+                      onClick={handleUserUpdate}
                       disabled={updateUserMutation.isPending}
                     >
-                      {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                      {updateUserMutation.isPending
+                        ? "Saving..."
+                        : "Save Changes"}
                     </Button>
                   </div>
                 </div>
@@ -235,7 +231,11 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
         <TooltipProvider>
           <Tooltip open={showShareTooltip}>
             <TooltipTrigger asChild>
-              <Button variant="outline" onClick={handleShare}>
+              <Button
+                variant="outline"
+                onClick={handleShare}
+                className="bg-black text-white hover:bg-black hover:text-white"
+              >
                 <Share2 size={16} className="mr-2" />
                 Share
               </Button>
@@ -254,15 +254,15 @@ export const ProfileHeader = ({ initialUser }: IProfileProps) => {
             {user.instagramId}
           </a>
         ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2"
             onClick={() => {
               setIsEditDialogOpen(true);
               // Focus on Instagram field after a short delay to allow dialog to open
               setTimeout(() => {
-                const instagramInput = document.getElementById('instagramId');
+                const instagramInput = document.getElementById("instagramId");
                 if (instagramInput) {
                   instagramInput.focus();
                 }

@@ -2,24 +2,27 @@ import { prisma } from "@/db";
 import adminDB from "@/firebase-admin";
 import { TLikedProduct } from "@/types/products";
 
+export async function getAllUsers(userId: string) {
+  const res = await prisma.user.findMany();
+  const users = res.filter((user) => user.id !== userId);
+  return users;
+}
+
 export async function getUserFeed(userId: string) {
   try {
-    // Get all users that the current user follows
     const followingRelations = await prisma.follow.findMany({
       where: {
         followerId: userId,
       },
       include: {
-        following: true, // Include the following user data
+        following: true,
       },
     });
 
-    // Extract just the users being followed
     const followedUsers = followingRelations.map(
       (relation) => relation.following
     );
 
-    // Array to store all liked products
     const allLikedProducts: {
       userId: string;
       userEmail: string;
@@ -27,28 +30,24 @@ export async function getUserFeed(userId: string) {
       products: TLikedProduct[];
     }[] = [];
 
-    // For each followed user, get their liked products from Firebase
     for (const user of followedUsers) {
-      if (!user.email) continue; // Skip if no email (shouldn't happen but just in case)
+      if (!user.email) continue;
 
-      // Get user's liked products from Firebase
       const likesSnapshot = await adminDB
         .collection("users")
         .doc(user.email)
         .collection("likes")
         .get();
 
-      // Transform Firebase documents to product objects
       const likedProducts: TLikedProduct[] = [];
       likesSnapshot.forEach((doc) => {
         const data = doc.data() as TLikedProduct;
         likedProducts.push({
           ...data,
-          id: doc.id, // Include the document ID
+          id: doc.id,
         });
       });
 
-      // Add this user's products to the result
       if (likedProducts.length > 0) {
         allLikedProducts.push({
           userId: user.id,

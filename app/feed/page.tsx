@@ -1,4 +1,7 @@
 import { Feed } from "@/components/Feed";
+import { FeedHeader } from "@/components/FeedHeader";
+import { FollowOptions } from "@/components/FollowOptions";
+import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
 import { getUserFeed } from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -23,7 +26,7 @@ export default async function FeedHome() {
   const session = await getServerSession(authOptions);
   const feedResponse = await getUserFeed(session?.user?.id!);
   const feedItems = feedResponse?.data as FeedItem[] || [];
-//   console.log(feedResponse)
+
   // Flatten all products from all users into a single array
   const allProducts = feedItems.flatMap(item => 
     item.products.map(product => ({
@@ -35,7 +38,6 @@ export default async function FeedHome() {
       }
     }))
   );    
-  console.log(allProducts)
 
   if (!allProducts.length) {
     return (
@@ -49,7 +51,10 @@ export default async function FeedHome() {
   }
 
   return (
-    <div>
+    <div className="pt-28 container mx-auto p-4 font-serif">
+        <FeedHeader/>
+        <FollowOptions/>
+        <Separator/>
         <Feed allProducts={allProducts}  />
     </div>
   );

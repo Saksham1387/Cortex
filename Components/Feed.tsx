@@ -1,17 +1,15 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
 
-export const Feed = (allProducts:any) => {
-    console.log('allProducts', allProducts)
+export const Feed = (allProducts: any) => {
+  return (
+    <div className="container mx-auto p-4 font-serif">
+      <h1 className="text-lg font-light text-gray-500 mb-6">From your following</h1>
 
-    return (
-        <div className="container mx-auto p-4 pt-28 font-serif">
-      <h1 className="text-2xl font-semibold mb-6">Your Feed</h1>
-      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {allProducts.allProducts.map((item:any) => (
+        {allProducts.allProducts.map((item: any) => (
           <div
             key={item.product.id}
             className="flex flex-col border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
@@ -39,7 +37,7 @@ export const Feed = (allProducts:any) => {
                 <div className="font-medium text-gray-900">
                   {item.product.price || ""}
                 </div>
-                
+
                 {/* User Avatar */}
                 <Avatar className="h-6 w-6">
                   {/* <AvatarImage src={} /> */}
@@ -66,6 +64,5 @@ export const Feed = (allProducts:any) => {
         ))}
       </div>
     </div>
-
-    )
+  );
 };
