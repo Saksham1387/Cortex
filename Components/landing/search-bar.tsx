@@ -177,7 +177,7 @@ export function SearchBar() {
                   <div
                     key={`${suggestion}-${index}`}
                     className="text-sm cursor-pointer select-none relative py-3 px-4 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0 flex items-center"
-                    onClick={() => handleSuggestionClick(suggestion)}
+                    onClick={() => setInput(suggestion)}
                   >
                     <GiClothes className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
                     <span>{suggestion}</span>
