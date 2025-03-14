@@ -1,7 +1,14 @@
 import { RotateCw, Search } from "lucide-react";
 import { Input } from "./ui/input";
 
-export const FeedHeader = () => {
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getAllUsers } from "@/lib/db";
+import { UserSearch } from "./UserSearch";
+
+export const FeedHeader = async () => {
+    const session = await getServerSession(authOptions);
+    const users = await getAllUsers(session?.user.id!);
   return (
     <div className="container mx-auto p-4 font-serif flex flex-row justify-between">
       <div className="flex flex-row items-center justify-start gap-3">
@@ -10,15 +17,7 @@ export const FeedHeader = () => {
           <RotateCw className="font-bold w-7 h-7" />{" "}
         </button>
       </div>
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2">
-          <Search className="h-4 w-4 text-gray-500" />
-        </div>
-        <Input
-          placeholder="Find users by name"
-          className="w-96 rounded-3xl pl-10 pr-5"  
-        />
-      </div>
+      <UserSearch users={users}/>
     </div>
   );
 };

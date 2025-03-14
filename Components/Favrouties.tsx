@@ -4,46 +4,69 @@ import { collection, query } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useMemo } from "react";
 
-export const Favorites = () => {
+interface FavoritesProps {
+  userEmail: string;
+}
+
+export const Favorites = ({ userEmail }: FavoritesProps) => {
   const { data: session } = useSession();
   const [sortOption, setSortOption] = useState("recent");
 
   const [favItems, fetching, error] = useCollection(
-    session && query(collection(db, "users", session?.user?.email!, "likes"))
+    session &&
+      query(
+        collection(
+          db,
+          "users",
+          userEmail ? userEmail : session?.user?.email!,
+          "likes"
+        )
+      )
   );
 
   const sortedItems = useMemo(() => {
     if (!favItems) return [];
-    // Create a copy of the docs array to avoid mutating the original
+
     const items = [...favItems.docs];
-    
+
     switch (sortOption) {
       case "price-low":
         return items.sort((a, b) => {
-          // Extract numeric price values
-          const priceA = parseFloat(a.data().price?.replace(/[^0-9.]/g, '') || 0);
-          const priceB = parseFloat(b.data().price?.replace(/[^0-9.]/g, '') || 0);
+          const priceA = parseFloat(
+            a.data().price?.replace(/[^0-9.]/g, "") || 0
+          );
+          const priceB = parseFloat(
+            b.data().price?.replace(/[^0-9.]/g, "") || 0
+          );
           return priceA - priceB;
         });
-      
+
       case "price-high":
         return items.sort((a, b) => {
-          // Extract numeric price values
-          const priceA = parseFloat(a.data().price?.replace(/[^0-9.]/g, '') || 0);
-          const priceB = parseFloat(b.data().price?.replace(/[^0-9.]/g, '') || 0);
+          const priceA = parseFloat(
+            a.data().price?.replace(/[^0-9.]/g, "") || 0
+          );
+          const priceB = parseFloat(
+            b.data().price?.replace(/[^0-9.]/g, "") || 0
+          );
           return priceB - priceA;
         });
-      
+
       case "recent":
       default:
-        // Assuming there's a timestamp field or using doc ID as fallback
         return items.sort((a, b) => {
           const timestampA = a.data().timestamp?.toMillis() || 0;
           const timestampB = b.data().timestamp?.toMillis() || 0;
-          return timestampB - timestampA; // Most recent first
+          return timestampB - timestampA;
         });
     }
   }, [favItems, sortOption]);
@@ -62,8 +85,8 @@ export const Favorites = () => {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-lg font-medium">{itemCount} items</h2>
-        <Select 
-          value={sortOption} 
+        <Select
+          value={sortOption}
           onValueChange={(value) => setSortOption(value)}
         >
           <SelectTrigger className="w-[180px]">
@@ -84,7 +107,7 @@ export const Favorites = () => {
           return (
             <div
               key={productId}
-              className="flex flex-col border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              className="flex flex-col rounded-lg overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="aspect-square relative">
                 <Link

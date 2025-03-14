@@ -12,7 +12,7 @@ export const Feed = (allProducts: any) => {
         {allProducts.allProducts.map((item: any) => (
           <div
             key={item.product.id}
-            className="flex flex-col border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+            className="flex flex-col rounded-lg overflow-hidden transition-shadow relative"
           >
             <div className="aspect-square relative">
               <Link

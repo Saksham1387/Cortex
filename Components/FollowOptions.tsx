@@ -1,19 +1,15 @@
-import { authOptions } from "@/lib/auth";
-import { getAllUsers } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
+"use client"
 import { Button } from "./ui/button";
 import Image from "next/image";
 
-export const FollowOptions = async () => {
-  const session = await getServerSession(authOptions);
-  const users = await getAllUsers(session?.user.id!);
-
+export const FollowOptions = (users:any) => {
   if (!users) return null;
+
   return (
     <div className="container mx-auto p-4 font-serif">
       <h1 className="text-lg font-light text-gray-500 mb-6">Get Inspired By</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-        {users.map((user, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1">
+        {users.users.map((user:any, index:number) => (
           <div
             key={index}
             className="flex flex-col gap-2 items-center justify-center w-full"
