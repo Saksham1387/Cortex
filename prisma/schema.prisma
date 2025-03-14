@@ -19,7 +19,7 @@ model User {
   name         String?
   image        String?
   instagramId  String?
-  gender       Gender?    
+  gender       Gender?
   bio          String?
   isPublic     Boolean   @default(true)
   requestCount Int       @default(0)
@@ -39,10 +39,17 @@ enum Gender {
   OTHER
 }
 
+model UserQuery {
+  id        Int      @id @default(autoincrement())
+  userId    String?
+  queryText String
+  createdAt DateTime @default(now())
+}
+
 model Follow {
   id          String   @id @default(cuid())
-  followerId  String 
-  followingId String  
+  followerId  String
+  followingId String
   createdAt   DateTime @default(now())
   follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
   following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
