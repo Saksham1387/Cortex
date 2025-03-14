@@ -1,4 +1,4 @@
-import { prisma } from "@/db";
+import  prisma  from "@/db";
 import GoogleProvider from "next-auth/providers/google";
 import { generateUsername } from "unique-username-generator";
 import { PrismaAdapter } from "@auth/prisma-adapter";

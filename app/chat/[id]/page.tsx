@@ -11,7 +11,6 @@ type Props = {
 
 const Chatpage = ({ params: { id } }: Props) => {
   const [loading, setLoading] = useState(false);
-  console.log(loading);
   return (
     <div className="flex flex-col h-screen w-full bg-[#fafafa] pt-10">
       <div className="pb-28">

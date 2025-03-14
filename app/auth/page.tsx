@@ -9,7 +9,7 @@ export default async function Auth(){
         redirect("/")
     }
     return(
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center pt-28">
         <SignupForm/>
         </div>
     )

@@ -1,4 +1,4 @@
-import { prisma } from "@/db";
+import prisma from "@/db";
 import adminDB from "@/firebase-admin";
 import { TLikedProduct } from "@/types/products";
 

@@ -17,7 +17,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
       .collection("likes");
 
     await likesRef.add(body);
-    console.log(body);
     return NextResponse.json({ data: "Success" });
   } catch (e) {
     console.error("Error processing request:", e);

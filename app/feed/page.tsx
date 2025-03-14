@@ -3,7 +3,7 @@ import { FeedHeader } from "@/components/FeedHeader";
 import { FollowOptions } from "@/components/FollowOptions";
 import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
-import { getUserFeed } from "@/lib/db";
+import { getAllUsers, getUserFeed } from "@/lib/db";
 import { getServerSession } from "next-auth";
 
 type TLikedProduct = {
@@ -26,6 +26,7 @@ export default async function FeedHome() {
   const session = await getServerSession(authOptions);
   const feedResponse = await getUserFeed(session?.user?.id!);
   const feedItems = feedResponse?.data as FeedItem[] || [];
+  const users = await getAllUsers(session?.user.id!);
 
   // Flatten all products from all users into a single array
   const allProducts = feedItems.flatMap(item => 
@@ -51,9 +52,9 @@ export default async function FeedHome() {
   }
 
   return (
-    <div className="pt-28 container mx-auto p-4 font-serif">
+    <div className="pt-24 container mx-auto p-4 font-serif">
         <FeedHeader/>
-        <FollowOptions/>
+        <FollowOptions users={users}/>
         <Separator/>
         <Feed allProducts={allProducts}  />
     </div>

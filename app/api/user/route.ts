@@ -1,4 +1,4 @@
-import { prisma } from "@/db";
+import prisma  from "@/db";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -36,7 +36,6 @@ export async function PATCH(req: NextRequest, res: NextResponse) {
         }
       );
     }
-    console.log(validatedBody)
     const updateUser = await prisma.user.update({
       where: {
         id: session.user.id,

@@ -75,7 +75,6 @@ export async function POST(request: Request, res: NextApiResponse) {
     const queryResult = await model.generateContent([queryPrompt]);
     const optimizedQuery = queryResult.response.text().trim();
 
-    console.log(optimizedQuery)
     const searchPromise = new Promise((resolve, reject) => {
       getJson(
         {
