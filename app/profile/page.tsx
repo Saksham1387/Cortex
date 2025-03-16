@@ -25,7 +25,7 @@ export default async function Profile() {
           />
         </div>
       </div>
-      <Favorites />
+      <Favorites userEmail={user.email}/>
     </div>
   );
 }
