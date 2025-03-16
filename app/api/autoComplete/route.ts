@@ -1,33 +1,3 @@
-// import { NextRequest, NextResponse } from "next/server";
-
-// export async function GET(req: NextRequest) {
-//   const { searchParams } = new URL(req.url);
-  
-//   // Get the query parameter
-//   const query = searchParams.get('query');
-//   console.log(query)
-//   const suggestions = await prisma.userQuery.findMany({
-//     where: {
-//       OR: [
-//         { queryText: { startsWith: query } },
-//         { queryText: { contains: ` ${query}` } }, 
-//         { queryText: { contains: ` ${query} ` } }, 
-//       ],
-//     },
-//     select: {
-//       queryText: true,
-//     },
-//     distinct: ["queryText"],
-//     take: 10,
-//   });
-
-//   const results = suggestions.map((item) => item.queryText);
-//   return NextResponse.json({ 
-//     suggestions: results 
-//   });
-// }
-
-
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
@@ -53,7 +23,8 @@ export async function GET(req: NextRequest) {
       distinct: ["queryText"],
       take: 10,
     });
-    
+
+    console.log('Recent queries:', recentQueries);
     return NextResponse.json({ 
       suggestions: recentQueries.map(item => item.queryText) 
     });
