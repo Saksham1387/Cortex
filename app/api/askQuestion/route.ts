@@ -5,12 +5,14 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generatePrompt, generateQueryPrompt } from "@/app/prompts";
 import { incrementRequestCount } from "@/lib/db";
-
+import { rerankResults } from "@/lib/reranker";
+ 
 const { getJson } = require("serpapi");
 
 type Message = {
   text: string;
   products?: any;
+  originalProducts?: any; // Add this property to the type definition
   createdAt: admin.firestore.Timestamp;
   user: {
     _id: string;
@@ -22,25 +24,12 @@ type Message = {
 const client = new GoogleGenerativeAI(process.env.GEMINI_API || "");
 const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Number of previous messages to include as context
 const MAX_CONTEXT_MESSAGES = 10;
 
+// Updated POST handler for /api/askQuestion
 export async function POST(request: Request, res: NextApiResponse) {
   try {
     const { prompt, chatId, session } = await request.json();
-
-    // const hasQuotaRemaining = await checkRequestLimit(session.user.id);
-
-    // if (!hasQuotaRemaining) {
-    //   return NextResponse.json(
-    //     {
-    //       answer:
-    //         "You've reached the maximum number of free requests. Please upgrade to premium to continue.",
-    //       error: "QUOTA_EXCEEDED",
-    //     },
-    //     { status: 402 }
-    //   ); // 402 Payment Required
-    // }
 
     const userMessage: Message = {
       text: prompt,
@@ -71,11 +60,13 @@ export async function POST(request: Request, res: NextApiResponse) {
 
     previousMessages.reverse();
 
+    // Step 1: Generate Optimized Search Query
     const queryPrompt = generateQueryPrompt(prompt, previousMessages);
     const queryResult = await model.generateContent([queryPrompt]);
     const optimizedQuery = queryResult.response.text().trim();
 
-    const searchPromise = new Promise((resolve, reject) => {
+    // Step 2: Fetch Search Results
+    const searchPromise: Promise<any[]> = new Promise((resolve, reject) => {
       getJson(
         {
           engine: "google_shopping",
@@ -84,23 +75,35 @@ export async function POST(request: Request, res: NextApiResponse) {
           api_key: process.env.SERP_API,
         },
         (json: any) => {
-          resolve(json["shopping_results"]);
+          if (json && json["shopping_results"]) {
+            resolve(json["shopping_results"]);
+          } else {
+            reject(new Error("No search results found"));
+          }
         }
       );
     });
+    
+    // Store the original results before reranking
+    let originalResults = await searchPromise;
+    
+    // Step 3: Re-Rank the Results using Metadata
+    let rerankedResults = await rerankResults([...originalResults], prompt);
 
-    const searchRes = await searchPromise;
-    const llmPrompt = generatePrompt(prompt, searchRes, previousMessages);
+    // Step 4: Generate Final LLM Response
+    const llmPrompt = generatePrompt(prompt, rerankedResults, previousMessages);
     const result = await model.generateContent([llmPrompt]);
+
     await messagesRef.add(userMessage);
 
     const message: Message = {
       text: result.response.text() || "Sorry, I don't understand",
-      products: searchRes,
+      products: rerankedResults,
+      originalProducts: originalResults, // Use the correct property name here
       createdAt: admin.firestore.Timestamp.now(),
       user: {
-        _id: "SpaceGPT",
-        name: "SpaceGPT",
+        _id: "CortexQ",
+        name: "CortexQ",
         avatar:
           "https://gold-legislative-tuna-190.mypinata.cloud/ipfs/bafkreig4sc5zimeoqftn3i6danbeeoxegywjznhpzkmhqe4mwnd356rjhq",
       },
@@ -112,6 +115,8 @@ export async function POST(request: Request, res: NextApiResponse) {
     return NextResponse.json({
       answer: message.text as string,
       searchQuery: optimizedQuery,
+      originalProducts: originalResults,
+      rerankedProducts: rerankedResults
     });
   } catch (e) {
     return NextResponse.json(

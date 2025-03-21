@@ -4,7 +4,7 @@ import { collection, orderBy, query } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { useEffect, useRef } from "react";
-import Message from "./Message";
+import Message from "./Message"; // Make sure this imports your newly created Message component
 import { ArrowDownIcon } from "@heroicons/react/24/outline";
 import { MessageSkeleton, ProductsSkeleton } from "./skeletons/chat";
 import ThinkingAnimation from "./ThinkingAnimation";
@@ -30,7 +30,6 @@ const Chat = ({ chatId, loading }: Props) => {
         orderBy("createdAt", "asc")
       )
   );
-
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +57,7 @@ const Chat = ({ chatId, loading }: Props) => {
 
       {messages?.empty && !fetching && (
         <div className="flex flex-col items-center justify-center h-full max-w-xl mx-auto px-4 py-8 text-black font-serif">
-          <div className=" rounded-lg p-6 text-center w-full">
+          <div className="rounded-lg p-6 text-center w-full">
             <h3 className="text-xl font-semibold text-black mb-4">
               Start a new conversation
             </h3>
@@ -74,7 +73,7 @@ const Chat = ({ chatId, loading }: Props) => {
       {messages?.docs.map((message) => (
         <Message key={message.id} message={message.data()} />
       ))}
-      
+
       {loading ? <ThinkingAnimation /> : null}
 
       <div ref={chatEndRef}></div>

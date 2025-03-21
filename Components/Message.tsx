@@ -13,8 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart } from "lucide-react";
+import { ArrowUpDown, Heart } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 type Props = {
   messageId?: string;
@@ -22,6 +28,8 @@ type Props = {
 };
 
 type SortOption = "default" | "low-to-high" | "high-to-low";
+type ViewOption = "reranked" | "original" | "compare";
+type DisplayMode = "tabs" | "sideBySide";
 
 type TLikedProduct = {
   product_id: string;
@@ -42,13 +50,16 @@ const MessageMarkdownRenderer = ({
   const [error, setError] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(8);
   const [sortOption, setSortOption] = useState<SortOption>("default");
+  const [viewOption, setViewOption] = useState<ViewOption>("reranked");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("tabs");
   const [sortedProducts, setSortedProducts] = useState<any[]>([]);
+  const [sortedOriginalProducts, setSortedOriginalProducts] = useState<any[]>([]);
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
 
   const router = useRouter();
 
   const loadMore = useCallback(() => {
-    setDisplayCount((prevCount) => prevCount + 10);
+    setDisplayCount((prevCount) => prevCount + 8);
   }, []);
 
   useEffect(() => {
@@ -78,25 +89,54 @@ const MessageMarkdownRenderer = ({
     }
   }, [messageId, initialMessage]);
 
+  // Sort both products and originalProducts
   useEffect(() => {
     if (message?.products) {
       const products = [...message.products];
-
-      const parsePrice = (priceStr: string) => {
-        if (!priceStr) return 0;
-
-        const numericPrice = parseFloat(priceStr.replace(/[$,£€]/g, ""));
-        return isNaN(numericPrice) ? 0 : numericPrice;
-      };
-
-      if (sortOption === "low-to-high") {
-        products.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
-      } else if (sortOption === "high-to-low") {
-        products.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
-      }
-      setSortedProducts(products);
+      setSortedProducts(sortProductsByPrice(products, sortOption));
+    }
+    
+    if (message?.originalProducts) {
+      const originalProducts = [...message.originalProducts];
+      setSortedOriginalProducts(sortProductsByPrice(originalProducts, sortOption));
     }
   }, [message, sortOption]);
+
+  const sortProductsByPrice = (products: any[], sortOption: SortOption) => {
+    const parsePrice = (priceStr: string) => {
+      if (!priceStr) return 0;
+      const numericPrice = parseFloat(priceStr.replace(/[$,£€]/g, ""));
+      return isNaN(numericPrice) ? 0 : numericPrice;
+    };
+
+    const sortedProducts = [...products];
+    
+    if (sortOption === "low-to-high") {
+      sortedProducts.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+    } else if (sortOption === "high-to-low") {
+      sortedProducts.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+    }
+    
+    return sortedProducts;
+  };
+
+  // Find position change between original and reranked products
+  const findPositionChange = (product: any) => {
+    if (!message?.originalProducts || !message?.products) return 0;
+    
+    const getProductIdentifier = (p: any) => p.product_link || p.link || p.title;
+    const productId = getProductIdentifier(product);
+    
+    const originalIndex = message.originalProducts.findIndex(
+      (p: any) => getProductIdentifier(p) === productId
+    );
+    const rerankedIndex = message.products.findIndex(
+      (p: any) => getProductIdentifier(p) === productId
+    );
+    
+    if (originalIndex === -1 || rerankedIndex === -1) return 0;
+    return originalIndex - rerankedIndex;
+  };
 
   const handleLike = async (product: any) => {
     try {
@@ -106,7 +146,7 @@ const MessageMarkdownRenderer = ({
       const likedProduct: TLikedProduct = {
         product_id: productId,
         thumbnail: product.thumbnail || "",
-        product_link: product.product_link || "",
+        product_link: product.product_link || product.link || "",
         title: product.title || "",
         price: product.price || "",
       };
@@ -123,6 +163,7 @@ const MessageMarkdownRenderer = ({
       if (response) {
         toast("Liked!", {});
         // Update local state to reflect the liked status
+        setLikedProducts(prev => [...prev, productId]);
       } else {
         console.error("Failed to like product");
       }
@@ -143,9 +184,12 @@ const MessageMarkdownRenderer = ({
     return <div className="p-4">No message data available</div>;
   }
 
-  const isGPT = message.user?.name === "SpaceGPT";
-  const hasMoreProducts =
-    sortedProducts && displayCount < sortedProducts.length;
+  const isGPT = message.user?.name === "SpaceGPT" || message.user?._id === "CortexQ";
+  const hasMoreProducts = sortedProducts && displayCount < sortedProducts.length;
+  const hasMoreOriginalProducts = sortedOriginalProducts && displayCount < sortedOriginalProducts.length;
+  const hasOriginalProducts = message.originalProducts && message.originalProducts.length > 0;
+  const hasRerankedProducts = message.products && message.products.length > 0;
+  const hasProductComparisonAvailable = hasOriginalProducts && hasRerankedProducts;
 
   const getSortLabel = () => {
     switch (sortOption) {
@@ -156,6 +200,108 @@ const MessageMarkdownRenderer = ({
       default:
         return "Sort results by";
     }
+  };
+
+  const renderProductCard = (product: any, index: number, showRankChange = false) => {
+    const productId = product.id || `product-${index}`;
+    const isLiked = likedProducts.includes(productId);
+    const positionChange = showRankChange ? findPositionChange(product) : 0;
+    const productLink = product.product_link || product.link || "#";
+
+    return (
+      <div
+        key={index}
+        className="flex flex-col border border-gray-100 rounded-lg overflow-hidden relative"
+      >
+        {showRankChange && positionChange !== 0 && (
+          <div className="absolute top-2 left-2 z-10 rounded-full text-xs font-medium px-2 py-1 flex items-center justify-center shadow-sm"
+            style={{
+              backgroundColor: positionChange > 0 ? 'rgba(220, 252, 231, 0.95)' : 'rgba(254, 226, 226, 0.95)',
+              color: positionChange > 0 ? '#166534' : '#991b1b'
+            }}
+          >
+            {positionChange > 0 ? `↑${positionChange}` : `↓${Math.abs(positionChange)}`}
+          </div>
+        )}
+        
+        {product.score !== undefined && (
+          <div className="absolute top-2 right-2 z-10 bg-blue-50 text-blue-700 rounded-full text-xs px-2 py-1 shadow-sm">
+            Score: {(product.score * 100).toFixed(0)}%
+          </div>
+        )}
+
+        <div className="aspect-square relative">
+          <Link
+            href={productLink}
+            className="cursor-pointer"
+            target="_blank"
+          >
+            {product.thumbnail && (
+              <div className="w-full h-full relative rounded-xl p-2">
+                <img
+                  src={product.thumbnail}
+                  width={100}
+                  height={100}
+                  alt={product.title || "Product image"}
+                  className="w-full h-full object-cover rounded-xl"
+                />
+
+                {/* Like Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLike(product);
+                  }}
+                  className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md transition-all hover:scale-110"
+                  aria-label="Like product"
+                >
+                  <Heart
+                    size={18}
+                    className={`${
+                      isLiked
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-500"
+                    }`}
+                  />
+                </button>
+
+                {product.tag && (
+                  <div className="">
+                    <div className="absolute top-2 left-2 bg-gray-100 text-xs px-2 py-1 rounded-full">
+                      {product.tag}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </Link>
+        </div>
+        <div className="p-3 bg-transparent">
+          <div className="flex justify-between items-start">
+            <div className="font-medium text-gray-900">
+              {product.price || ""}
+            </div>
+            <div className="text-xs text-gray-500">
+              {product.source || product.store || ""}
+            </div>
+          </div>
+          <div className="text-sm text-gray-900 mt-1 line-clamp-2">
+            {product.title || "Product Name"}
+          </div>
+          <div className="mt-2">
+            <button
+              onClick={() => {
+                window.open(productLink, "_blank");
+              }}
+              className="w-full text-gray-500 text-xs font-medium rounded transition-colors"
+            >
+              Click for details
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -186,10 +332,47 @@ const MessageMarkdownRenderer = ({
             </div>
 
             {/* Product recommendations section */}
-            {isGPT && message.products && message.products.length > 0 && (
+            {isGPT && (hasRerankedProducts || hasOriginalProducts) && (
               <div className="flex flex-col gap-4 mt-4">
-                {/* Sort dropdown */}
-                <div className="flex justify-end mb-2">
+                {/* Controls for sorting and view options */}
+                <div className="flex justify-between mb-2">
+                  {/* Display mode switcher - only show if we have both original and reranked */}
+                  {hasProductComparisonAvailable && (
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`text-xs ${viewOption === "compare" ? "bg-gray-100" : ""}`}
+                        onClick={() => setViewOption("compare")}
+                      >
+                        <ArrowUpDown className="mr-1 h-3 w-3" />
+                        Compare Rankings
+                      </Button>
+                      
+                      {viewOption === "compare" && (
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`text-xs ${displayMode === "tabs" ? "bg-gray-100" : ""}`}
+                            onClick={() => setDisplayMode("tabs")}
+                          >
+                            Tabs
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`text-xs ${displayMode === "sideBySide" ? "bg-gray-100" : ""}`}
+                            onClick={() => setDisplayMode("sideBySide")}
+                          >
+                            Side by Side
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Sort dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -234,93 +417,129 @@ const MessageMarkdownRenderer = ({
                   </DropdownMenu>
                 </div>
 
-                {/* Product grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {sortedProducts
-                    .slice(0, displayCount)
-                    .map((product: any, index: number) => {
-                      const productId = product.id || `product-${index}`;
-                      const isLiked = likedProducts.includes(productId);
-
-                      return (
-                        <div
-                          key={index}
-                          className="flex flex-col border-none rounded-lg overflow-hidden"
-                        >
-                          <div className="aspect-square relative">
-                            <Link
-                              href={product.product_link}
-                              className="cursor-pointer"
-                            >
-                              {product.thumbnail && (
-                                <div className="w-full h-full relative rounded-xl p-2">
-                                  <img
-                                    src={product.thumbnail}
-                                    width={100}
-                                    height={100}
-                                    alt={product.title || "Product image"}
-                                    className="w-full h-full object-cover rounded-xl"
-                                  />
-
-                                  {/* Like Button */}
-                                  <button
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleLike(product);
-                                    }}
-                                    className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md transition-all hover:scale-110"
-                                    aria-label="Like product"
-                                  >
-                                    <Heart
-                                      size={18}
-                                      className={`${
-                                        isLiked
-                                          ? "fill-red-500 text-red-500"
-                                          : "text-gray-500"
-                                      }`}
-                                    />
-                                  </button>
-
-                                  {product.tag && (
-                                    <div className="">
-                                      <div className="absolute top-2 left-2 bg-gray-100 text-xs px-2 py-1 rounded-full">
-                                        {product.tag}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </Link>
-                          </div>
-                          <div className="p-3 bg-transparent">
-                            <div className="flex justify-between items-start">
-                              <div className="font-medium text-gray-900">
-                                {product.price || ""}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {product.source || ""}
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-900 mt-1 line-clamp-2">
-                              {product.title || "Product Name"}
-                            </div>
-                            <div className="mt-2">
-                              <button
-                                onClick={() => {
-                                  window.open(product.product_link, "_blank");
-                                }}
-                                className="w-full text-gray-500 text-xs font-medium rounded transition-colors"
-                              >
-                                Click for details
-                              </button>
-                            </div>
-                          </div>
+                {/* Product display based on view option */}
+                {viewOption === "compare" && hasProductComparisonAvailable ? (
+                  displayMode === "tabs" ? (
+                    // Tabs view
+                    <Tabs defaultValue="reranked" className="w-full">
+                      <TabsList className="w-full flex mb-4">
+                        <TabsTrigger value="reranked" className="flex-1">
+                          Optimized Rankings
+                        </TabsTrigger>
+                        <TabsTrigger value="original" className="flex-1">
+                          Original Rankings
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      {/* Reranked products tab */}
+                      <TabsContent value="reranked" className="mt-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {sortedProducts
+                            .slice(0, displayCount)
+                            .map((product, index) => 
+                              renderProductCard(product, index, true)
+                            )}
                         </div>
-                      );
-                    })}
-                </div>
-                {hasMoreProducts && (
+                        {hasMoreProducts && (
+                          <div className="flex justify-center mt-6">
+                            <Button
+                              variant="outline"
+                              onClick={loadMore}
+                              className="px-6"
+                            >
+                              Load More
+                            </Button>
+                          </div>
+                        )}
+                      </TabsContent>
+                      
+                      {/* Original products tab */}
+                      <TabsContent value="original" className="mt-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {sortedOriginalProducts
+                            .slice(0, displayCount)
+                            .map((product, index) => 
+                              renderProductCard(product, index)
+                            )}
+                        </div>
+                        {hasMoreOriginalProducts && (
+                          <div className="flex justify-center mt-6">
+                            <Button
+                              variant="outline"
+                              onClick={loadMore}
+                              className="px-6"
+                            >
+                              Load More
+                            </Button>
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  ) : (
+                    // Side by side view
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Original products */}
+                      <div>
+                        <h3 className="font-medium text-gray-900 mb-4 text-center">Original Rankings</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {sortedOriginalProducts
+                            .slice(0, Math.min(displayCount, 8))
+                            .map((product, index) => 
+                              renderProductCard(product, index)
+                            )}
+                        </div>
+                        {sortedOriginalProducts.length > 8 && (
+                          <div className="flex justify-center mt-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open("#", "_blank")}
+                              className="px-4 text-xs"
+                            >
+                              See All
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Reranked products */}
+                      <div>
+                        <h3 className="font-medium text-gray-900 mb-4 text-center">Optimized Rankings</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {sortedProducts
+                            .slice(0, Math.min(displayCount, 8))
+                            .map((product, index) => 
+                              renderProductCard(product, index, true)
+                            )}
+                        </div>
+                        {sortedProducts.length > 8 && (
+                          <div className="flex justify-center mt-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open("#", "_blank")}
+                              className="px-4 text-xs"
+                            >
+                              See All
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  // Regular product grid (default view)
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {(hasRerankedProducts ? sortedProducts : sortedOriginalProducts)
+                      .slice(0, displayCount)
+                      .map((product, index) => 
+                        renderProductCard(product, index)
+                      )}
+                  </div>
+                )}
+
+                {/* Load more button for default view */}
+                {viewOption !== "compare" && hasMoreProducts && (
                   <div className="flex justify-center mt-6">
                     <Button
                       variant="outline"
@@ -333,9 +552,9 @@ const MessageMarkdownRenderer = ({
                 )}
 
                 {/* Tags at the bottom */}
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <span className="text-xs bg-gray-100 px-3 py-1.5 rounded-full">
-                    Cortex
+                    CortexQ
                   </span>
                   {message.tags &&
                     message.tags.map((tag: string, index: number) => (
