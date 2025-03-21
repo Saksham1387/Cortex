@@ -5,101 +5,70 @@ import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 
 export default function SignupForm() {
-  // const {data:session} = useSession();
-  // const router = useRouter();
-  // if(session?.user?.email){
-  //   router.push("/")
-  // }
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
+
   return (
-    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
+    <div className="max-w-md w-full mx-auto rounded-xl p-6 md:p-8 shadow-lg bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-700">
+      {/* Logo/Brand Mark */}
+      <div className="flex justify-center mb-6">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+          <span className="text-white text-2xl font-bold">CQ</span>
+        </div>
+      </div>
+
+      <h2 className="font-bold text-2xl text-gray-800 dark:text-white text-center">
         Welcome to CortexQ
       </h2>
-      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">
-        Login to aceternity if you can because we don&apos;t have a login flow
-        yet
+      
+      <p className="text-gray-500 text-sm max-w-sm mt-2 dark:text-gray-400 text-center mx-auto">
+      Find Your Style, Effortlessly
       </p>
 
-      <form className="my-8" onSubmit={handleSubmit}>
-        {/* <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
-          <LabelInputContainer>
-            <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
-          </LabelInputContainer>
-          <LabelInputContainer>
-            <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
-          </LabelInputContainer>
-        </div> */}
-        {/* <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-8">
-          <Label htmlFor="twitterpassword">Your twitter password</Label>
-          <Input
-            id="twitterpassword"
-            placeholder="••••••••"
-            type="twitterpassword"
-          />
-        </LabelInputContainer>
-
-        <button
-          className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
-          type="submit"
-        >
-          Sign up &rarr;
-          <BottomGradient />
-        </button> */}
-
-        <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
-
-        <div className="flex flex-col space-y-4">
-          {/* <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              GitHub
-            </span>
-            <BottomGradient />
-          </button> */}
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-            onClick={() => {
-              signIn("google");
-            }}
-          >
-            <FcGoogle className="w-5 h-5" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm text-center">
-              Google
-            </span>
-          </button>
-          {/* <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              OnlyFans
-            </span>
-            <BottomGradient />
-          </button> */}
+      <form className="mt-8" onSubmit={handleSubmit}>
+        {/* Decorative Wave Element */}
+        <div className="relative py-3 flex items-center justify-center mb-4">
+          <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          <div className="absolute px-3 bg-white dark:bg-zinc-900">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Continue with</span>
+          </div>
         </div>
+
+        <div className="space-y-4">
+          <button
+            className="relative w-full group flex items-center justify-center py-3 px-4 rounded-lg transition-all duration-200 
+                      bg-gray-50 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 
+                      text-gray-700 dark:text-gray-300 font-medium
+                      border border-gray-200 dark:border-zinc-700
+                      shadow-sm hover:shadow-md"
+            type="submit"
+            onClick={() => signIn("google")}
+          >
+            <div className="flex items-center">
+              <FcGoogle className="w-5 h-5 mr-3" />
+              <span>Sign in with Google</span>
+            </div>
+          </button>
+        </div>
+
+        {/* Future Options Note */}
+        <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-8">
+          More sign-in options coming soon
+        </p>
       </form>
+
+      {/* Bottom decorative element */}
+      <div className="mt-10 pt-4 border-t border-gray-100 dark:border-zinc-800">
+        <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+          By signing in, you agree to our Terms of Service & Privacy Policy
+        </p>
+      </div>
     </div>
   );
 }
 
+// We're not using these components right now, but keeping them for future use
 const LabelInputContainer = ({
   children,
   className,

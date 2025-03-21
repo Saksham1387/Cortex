@@ -26,13 +26,13 @@ export default async function Landing() {
               words={[
                 "Find unique deals, sustainably",
                 "A treasure hunt, just a click away",
-                "Rare finds. Great prices. One search",
-                "Shop smarter, shop secondhand",
-                "Hidden gems, waiting for you",
-                "Swipe, shop, and save effortlessly",
-                "One search, endless possibilities",
-                "Software Engineer",
-                "Pre-loved, re-loved—just for you.",
+                "Follow creators who inspire your closet.",
+                "Shop the looks celebrities are wearing now.",
+                "Build an incredible wardrobe piece by piece.",
+                "Connect with a community of fashion lovers.",
+                "Turn inspiration into your next favorite outfit.",
+                "Your personalized fashion discovery starts now.",
+                "From red carpet to your closet, effortlessly.",
               ]}
             />
           </div>

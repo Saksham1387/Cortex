@@ -21,6 +21,10 @@ model User {
   instagramId  String?
   gender       Gender?
   bio          String?
+  country       String?   @default("India")
+  countryCode   String?   @default("IN")
+  googleDomain  String?   @default("google.co.in")
+  currency      String?   @default("INR")
   isPublic     Boolean   @default(true)
   requestCount Int       @default(0)
   isPremium    Boolean   @default(false)
