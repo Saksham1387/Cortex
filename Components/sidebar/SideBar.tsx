@@ -13,10 +13,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";
-import ChatRow from "./ChatRow";
+import ChatRow from "../chat/ChatRow";
 
 const SideBar = () => {
   const { data: session } = useSession();

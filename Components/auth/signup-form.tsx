@@ -1,12 +1,24 @@
 "use client";
-import React from "react";
+import React, { useState, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 
 export default function SignupForm() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Handle Google sign in
+  const handleGoogleSignIn = () => {
+    setIsLoggingIn(true);
+    // Start Google sign-in and redirect to onboarding on success
+    signIn("google", { 
+      callbackUrl: "/onboard" // Redirect to onboarding page after login
+    });
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    handleGoogleSignIn();
   };
 
   return (
@@ -23,7 +35,7 @@ export default function SignupForm() {
       </h2>
       
       <p className="text-gray-500 text-sm max-w-sm mt-2 dark:text-gray-400 text-center mx-auto">
-      Find Your Style, Effortlessly
+        Find Your Style, Effortlessly
       </p>
 
       <form className="mt-8" onSubmit={handleSubmit}>
@@ -38,16 +50,17 @@ export default function SignupForm() {
         <div className="space-y-4">
           <button
             className="relative w-full group flex items-center justify-center py-3 px-4 rounded-lg transition-all duration-200 
-                      bg-gray-50 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 
-                      text-gray-700 dark:text-gray-300 font-medium
-                      border border-gray-200 dark:border-zinc-700
-                      shadow-sm hover:shadow-md"
-            type="submit"
-            onClick={() => signIn("google")}
+                     bg-gray-50 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 
+                     text-gray-700 dark:text-gray-300 font-medium
+                     border border-gray-200 dark:border-zinc-700
+                     shadow-sm hover:shadow-md"
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={isLoggingIn}
           >
             <div className="flex items-center">
               <FcGoogle className="w-5 h-5 mr-3" />
-              <span>Sign in with Google</span>
+              <span>{isLoggingIn ? "Signing in..." : "Sign in with Google"}</span>
             </div>
           </button>
         </div>
@@ -67,18 +80,3 @@ export default function SignupForm() {
     </div>
   );
 }
-
-// We're not using these components right now, but keeping them for future use
-const LabelInputContainer = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div className={cn("flex flex-col space-y-2 w-full", className)}>
-      {children}
-    </div>
-  );
-};

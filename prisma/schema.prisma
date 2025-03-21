@@ -14,35 +14,38 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  name         String?
-  image        String?
-  instagramId  String?
-  gender       Gender?
-  bio          String?
-  country       String?   @default("India")
-  countryCode   String?   @default("IN")
-  googleDomain  String?   @default("google.co.in")
-  currency      String?   @default("INR")
-  isPublic     Boolean   @default(true)
-  requestCount Int       @default(0)
-  isPremium    Boolean   @default(false)
-  accounts     Account[]
-  sessions     Session[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  followers    Follow[]  @relation("UserFollowers")
-  following    Follow[]  @relation("UserFollowing")
-  chats        Chat[]
-  queries      UserQuery[]
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  emailVerified      DateTime? // Added for NextAuth compatibility
+  name               String?
+  username           String?   @unique
+  image              String?
+  instagramId        String?
+  gender             Gender?
+  ageGroup           AgeGroup?
+  bio                String?   @db.Text
+  country            String?   @default("India")
+  countryCode        String?   @default("IN")
+  googleDomain       String?   @default("google.co.in")
+  currency           String?   @default("INR")
+  isPublic           Boolean   @default(true)
+  requestCount       Int       @default(0)
+  isPremium          Boolean   @default(false)
+  accounts           Account[]
+  sessions           Session[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  followers          Follow[]  @relation("UserFollowers")
+  following          Follow[]  @relation("UserFollowing")
+  chats              Chat[]
+  queries            UserQuery[]
+  
+  // Style preferences
+  aesthetics         UserAesthetic[]
+  sizes              UserSize[]
+  hasCompletedOnboarding Boolean @default(false)
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
 
 model UserQuery {
   id        Int      @id @default(autoincrement())
@@ -104,6 +107,53 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// New models for style preferences
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
+
+enum AgeGroup {
+  UNDER_18
+  AGE_18_24
+  AGE_25_34
+  AGE_35_44
+  AGE_45_54
+  AGE_55_PLUS
+  PREFER_NOT_TO_SAY
+}
+
+model UserAesthetic {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aesthetic String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, aesthetic])
+}
+
+enum SizeCategory {
+  TOPS
+  BOTTOMS
+  SHOES
+  OUTERWEAR
+  DRESSES
+}
+
+model UserSize {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  SizeCategory
+  size      String
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, category, size])
+}
 // New models for chat functionality
 
 model Chat {

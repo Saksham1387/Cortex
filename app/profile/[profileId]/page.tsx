@@ -1,5 +1,5 @@
-import { Favorites } from "@/components/Favrouties";
-import { SimpleProfileHeader } from "@/components/SimpleProfileHeader";
+import { Favorites } from "@/Components/profile/Favrouties";
+import { SimpleProfileHeader } from "@/Components/profile/SimpleProfileHeader";
 import { Input } from "@/components/ui/input";
 import { getUser } from "@/lib/db";
 

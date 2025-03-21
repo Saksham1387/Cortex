@@ -17,10 +17,10 @@ import {
   DrawerFooter,
   DrawerHeader,
 } from "@/components/ui/drawer";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { LogOutIcon, PlusCircleIcon } from "lucide-react";
-import ChatRow from "./ChatRow";
-import { Separator } from "./ui/separator";
+import ChatRow from "../chat/ChatRow";
+import { Separator } from "../ui/separator";
 
 const DRAWER_WIDTH = 250;
 

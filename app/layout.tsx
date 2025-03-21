@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { getServerSession } from "next-auth";
 import { Header } from "@/components/landing/header";
-import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { HistoryDrawer } from "@/Components/sidebar/HistoryDrawer";
 import { authOptions } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
