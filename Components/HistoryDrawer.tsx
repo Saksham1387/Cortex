@@ -34,7 +34,7 @@ export function HistoryDrawer() {
     session &&
       query(
         collection(db, "users", session.user?.email!, "chats"),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "desc") // Changed from "asc" to "desc" to show latest chats first
       )
   );
 
