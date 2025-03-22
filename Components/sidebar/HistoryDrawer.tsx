@@ -22,6 +22,7 @@ import { LogOutIcon, PlusCircleIcon } from "lucide-react";
 import ChatRow from "../chat/ChatRow";
 import { Separator } from "../ui/separator";
 
+
 const DRAWER_WIDTH = 250;
 
 export function HistoryDrawer() {

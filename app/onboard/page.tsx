@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import OnboardingFlow from "@/Components/auth/Onboarding-flow";
+import OnboardingFlow from "@/components/auth/Onboarding-flow";
+
 
 
 // Import the enhanced types

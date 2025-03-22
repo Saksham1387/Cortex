@@ -1,6 +1,7 @@
 "use client"
-import { Button } from "../ui/button";
+
 import { signIn } from "next-auth/react";
+import { Button } from "../ui/button";
 const Login = ( )=>{
     return (
         <div>

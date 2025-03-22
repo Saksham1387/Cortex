@@ -4,9 +4,10 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { getServerSession } from "next-auth";
 import { Header } from "@/components/landing/header";
-import { HistoryDrawer } from "@/Components/sidebar/HistoryDrawer";
+
 import { authOptions } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { HistoryDrawer } from "@/components/sidebar/HistoryDrawer";
 
 const inter = Inter({ subsets: ["latin"] });
 

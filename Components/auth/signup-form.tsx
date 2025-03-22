@@ -3,7 +3,7 @@ import React, { useState, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function SignupForm() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);

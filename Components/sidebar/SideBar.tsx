@@ -18,6 +18,7 @@ import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";
 import ChatRow from "../chat/ChatRow";
 
+
 const SideBar = () => {
   const { data: session } = useSession();
 

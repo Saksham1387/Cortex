@@ -5,12 +5,7 @@ import { IUser } from "@/types/user";
 import { Instagram, InstagramIcon, PenSquare, Share2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+
 import {
   Dialog,
   DialogContent,
@@ -18,11 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+
 
 interface IProfileProps {
   initialUser: IUser; 

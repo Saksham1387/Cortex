@@ -1,6 +1,7 @@
 "use client";
-import Chat from "@/components/Chat";
-import ChatInput from "@/components/ChatInput";
+
+import Chat from "@/components/chat/Chat";
+import ChatInput from "@/components/chat/ChatInput";
 import { useState } from "react";
 
 type Props = {
