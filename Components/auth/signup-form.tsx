@@ -3,6 +3,7 @@ import React, { useState, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
+import { Button } from "../ui/button";
 
 export default function SignupForm() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -48,7 +49,7 @@ export default function SignupForm() {
         </div>
 
         <div className="space-y-4">
-          <button
+          <Button
             className="relative w-full group flex items-center justify-center py-3 px-4 rounded-lg transition-all duration-200 
                      bg-gray-50 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 
                      text-gray-700 dark:text-gray-300 font-medium
@@ -62,7 +63,7 @@ export default function SignupForm() {
               <FcGoogle className="w-5 h-5 mr-3" />
               <span>{isLoggingIn ? "Signing in..." : "Sign in with Google"}</span>
             </div>
-          </button>
+          </Button>
         </div>
 
         {/* Future Options Note */}

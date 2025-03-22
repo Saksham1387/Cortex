@@ -1,6 +1,8 @@
 "use client"
-import { Button } from "./ui/button";
+
 import Image from "next/image";
+import { Button } from "../ui/button";
+
 
 export const FollowOptions = (users:any) => {
   if (!users) return null;
