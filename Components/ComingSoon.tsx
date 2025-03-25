@@ -5,7 +5,7 @@ export default function ComingSoon() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#fafafa] text-center px-4">
         <h1 className="text-4xl md:text-6xl font-bold mb-4">Coming Soon</h1>
         <p className="text-lg text-gray-600 max-w-2xl mb-8">
-          We're working hard to bring you something amazing. Stay tuned!
+          We&apos;re working hard to bring you something amazing. Stay tuned!
         </p>
         <div className="flex space-x-4">
           <input

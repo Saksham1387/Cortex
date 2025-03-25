@@ -1,7 +1,7 @@
 "use client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { IUser } from "@/types/user";
+
 import { Instagram, Share2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { IUser } from "@/lib/user.types";
 
 interface IProfileProps {
   initialUser: IUser;
