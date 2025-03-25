@@ -6,8 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generatePrompt, generateQueryPrompt } from "@/app/prompts";
 import { incrementRequestCount } from "@/lib/db";
 
-const { getJson } = require("serpapi");
-
+import {getJson} from 'serpapi'
 type Message = {
   text: string;
   products?: any;
