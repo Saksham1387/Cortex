@@ -8,7 +8,7 @@ export default async function ProfileId({
 }: {
   params: { profileId: string };
 }) {
-  const user = await getUser(params.profileId);
+  const user = await getUser(params.profileId) as any;
 
   return (
     <div className="container mx-auto max-w-6xl px-4 pt-28">

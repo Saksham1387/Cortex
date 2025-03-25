@@ -1,6 +1,7 @@
 import prisma from "@/db";
 import adminDB from "@/firebase-admin";
 import { TLikedProduct } from "@/types/products";
+import { IUser } from "./user.types";
 
 export async function getAllUsers(userId: string) {
   const res = await prisma.user.findMany();
